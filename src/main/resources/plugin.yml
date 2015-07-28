@@ -1,0 +1,31 @@
+name: HeadsInventory
+version: 1.0.0
+main: com.github.cc007.headsinventory.HeadsInventory
+author: Rik Schaaf aka CC007 (http://coolcat007.nl/)
+description: >
+             Search for heads in the 
+depend: [HeadsPlugin]
+commands:
+    headsinventory:
+        description: "Search for heads"
+        aliases: [hdsinv, headsinv, hdsinventory]
+    myhead:
+        description: "Receive your own head"
+        aliases: [myhd]
+    playerhead:
+        description: "Receive another player's head"
+        aliases: [plyrhd]
+    updateheads:
+        description: "update the cached heads"
+        aliases: [updatehds]
+permissions:
+    headsinv.myhead:
+        description: Allows the user to get their own head
+    headsinv.playerhead:
+        description: Allows the user to get another player's head
+    headsinv.inventory:
+        description: Allows the user to use the heads inventory
+    headsinv.update:
+        description: Allows the user to update the heads categories
+    headsinv.search:
+        description: Allows the user to search directly for heads from the database
