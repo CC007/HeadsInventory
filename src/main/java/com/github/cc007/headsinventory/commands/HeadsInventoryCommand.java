@@ -188,6 +188,10 @@ public class HeadsInventoryCommand implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "You need to specify a head.");
             return false;
         }
+        if (args[1].length() < 3) {
+            player.sendMessage(ChatColor.RED + "The keyword needs start with at least 3 characters.");
+            return false;
+        }
 
         String[] searchArgs = new String[args.length - 1];
         System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
@@ -198,6 +202,10 @@ public class HeadsInventoryCommand implements CommandExecutor {
     private boolean onSearchFirstCommand(Player player, String[] args) {
         if (args.length < 2) {
             player.sendMessage(ChatColor.RED + "You need to specify a head.");
+            return false;
+        }
+        if (args[1].length() < 3) {
+            player.sendMessage(ChatColor.RED + "The keyword needs start with at least 3 characters.");
             return false;
         }
 
