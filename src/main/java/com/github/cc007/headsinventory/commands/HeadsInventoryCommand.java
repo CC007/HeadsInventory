@@ -26,25 +26,15 @@ package com.github.cc007.headsinventory.commands;
 import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import com.github.cc007.headsplugin.HeadsPlugin;
-import com.github.cc007.headsplugin.bukkit.HeadCreator;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
-import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 /**
  *
@@ -168,7 +158,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
                 //return first head from search
                 return onSearchFirstCommand(player, args);
             default:
-                //TODO show help page?
+                player.sendMessage("Use: \n/headsinventory categories <categoryname>\n/headsinventory search <keyword> \n/headsinventory searchfirst <keyword>");
                 return true;
         }
     }

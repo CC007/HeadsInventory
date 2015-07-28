@@ -25,7 +25,6 @@ package com.github.cc007.headsinventory;
 
 import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.commands.HeadsInventoryTabCompleter;
-import com.github.cc007.headsplugin.HeadsPlugin;
 import java.util.logging.Level;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.plugin.Plugin;
