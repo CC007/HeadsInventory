@@ -27,8 +27,12 @@ import com.github.cc007.headsinventory.inventory.HeadsInventoryMenu;
 import com.github.cc007.headsplugin.bukkit.HeadCreator;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
 import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -68,7 +72,14 @@ public class HeadsSearch {
     }
 
     public static boolean search(Player player, String searchString) {
-        List<ItemStack> heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getHeads(searchString));
+        List<ItemStack> heads = null;
+        try {
+            heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getHeads(searchString));
+        } catch (SocketTimeoutException ex) {
+            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (heads == null || heads.isEmpty()) {
             player.sendMessage(ChatColor.RED + "No heads found.");
             return false;
@@ -80,7 +91,14 @@ public class HeadsSearch {
     }
 
     public static boolean searchFirst(Player player, String searchString) {
-        ItemStack head = HeadCreator.getItemStack(HeadsUtils.getInstance().getHead(searchString));
+        ItemStack head = null;
+        try {
+            head = HeadCreator.getItemStack(HeadsUtils.getInstance().getHead(searchString));
+        } catch (SocketTimeoutException ex) {
+            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (head == null) {
             player.sendMessage(ChatColor.RED + "No heads found.");
             return false;

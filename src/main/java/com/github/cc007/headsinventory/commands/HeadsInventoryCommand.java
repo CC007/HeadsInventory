@@ -27,8 +27,11 @@ import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import com.github.cc007.headsplugin.HeadsPlugin;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -90,7 +93,13 @@ public class HeadsInventoryCommand implements CommandExecutor {
 
         if (args.length < 2) {
             sender.sendMessage(ChatColor.GREEN + "Updating all categories...");
-            HeadsUtils.getInstance().loadCategories();
+            try {
+                HeadsUtils.getInstance().loadCategories();
+            } catch (SocketTimeoutException ex) {
+                Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
+            }
             sender.sendMessage(ChatColor.GREEN + "Update complete.");
             return true;
         }
@@ -98,7 +107,13 @@ public class HeadsInventoryCommand implements CommandExecutor {
         if (HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("predefinedcategories." + args[1]) || HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("customcategories." + args[1] + ".id")) {
             sender.sendMessage(ChatColor.GREEN + "Updating all category: " + args[1] + "...");
             try {
-                HeadsUtils.getInstance().loadCategory(args[1]);
+                try {
+                    HeadsUtils.getInstance().loadCategory(args[1]);
+                } catch (SocketTimeoutException ex) {
+                    Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } catch (NullPointerException ex) {
                 sender.sendMessage(ChatColor.RED + "Category is empty!");
                 return false;
