@@ -76,9 +76,9 @@ public class HeadsSearch {
         try {
             heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getHeads(searchString));
         } catch (SocketTimeoutException ex) {
-            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+            Bukkit.getLogger().log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+            Bukkit.getLogger().log(Level.SEVERE, null, ex);
         }
         if (heads == null || heads.isEmpty()) {
             player.sendMessage(ChatColor.RED + "No heads found.");
@@ -95,9 +95,9 @@ public class HeadsSearch {
         try {
             head = HeadCreator.getItemStack(HeadsUtils.getInstance().getHead(searchString));
         } catch (SocketTimeoutException ex) {
-            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+            Bukkit.getLogger().log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(HeadsSearch.class.getName()).log(Level.SEVERE, null, ex);
+            Bukkit.getLogger().log(Level.SEVERE, null, ex);
         }
         if (head == null) {
             player.sendMessage(ChatColor.RED + "No heads found.");
