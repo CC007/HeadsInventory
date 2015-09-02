@@ -23,6 +23,7 @@
  */
 package com.github.cc007.headsinventory.inventory;
 
+import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import java.util.HashMap;
 import java.util.Map;
