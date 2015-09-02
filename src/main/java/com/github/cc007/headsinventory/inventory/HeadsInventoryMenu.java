@@ -57,6 +57,7 @@ public class HeadsInventoryMenu {
                 inventoryPages.add(currentPage);
                 if (pageCount > 1) {
                     currentPage.setLeftArrow();
+                    currentPage.setDownArrow();
                 }
             }
             currentPage.putHead(i, head);
