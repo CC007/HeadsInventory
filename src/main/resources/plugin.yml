@@ -8,7 +8,7 @@ depend: [HeadsPlugin]
 commands:
     headsinventory:
         description: "Search for heads"
-        aliases: [hdsinv, headsinv, hdsinventory]
+        aliases: [hdsinv, headsinv, hdsinventory, sps, skull]
     myhead:
         description: "Receive your own head"
         aliases: [myhd]
@@ -18,6 +18,9 @@ commands:
     updateheads:
         description: "update the cached heads"
         aliases: [updatehds]
+    heads:
+        description: "shows help page"
+        aliases: []
 permissions:
     headsinv.myhead:
         description: Allows the user to get their own head
@@ -29,3 +32,5 @@ permissions:
         description: Allows the user to update the heads categories
     headsinv.search:
         description: Allows the user to search directly for heads from the database
+    headsinv.help:
+        description: Allows the user to see the help page
