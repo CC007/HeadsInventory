@@ -57,7 +57,10 @@ public class HeadsInventoryPage implements Listener {
         this.menu = menu;
         this.pageNr = pageNr;
         this.items = new HashMap<>();
-        Bukkit.getServer().getPluginManager().registerEvents(this, Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"));
+    }
+
+    public final void registerEvents() {
+        Bukkit.getServer().getPluginManager().registerEvents(this, HeadsInventory.getPlugin());
     }
 
     public void putHead(int index, ItemStack head) {
@@ -100,6 +103,7 @@ public class HeadsInventoryPage implements Listener {
                 }
             }
         }
+        registerEvents();
         menu.getPlayer().openInventory(inventory);
     }
 
