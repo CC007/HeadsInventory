@@ -25,7 +25,6 @@ package com.github.cc007.headsinventory;
 
 import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.commands.HeadsInventoryTabCompleter;
-import com.github.cc007.headsplugin.HeadsPlugin;
 import java.util.logging.Level;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -45,7 +44,6 @@ public class HeadsInventory extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-
 		/* Setup plugin hooks */
 		vault = getPlugin("Vault");
 		if (vault != null) {
@@ -53,15 +51,17 @@ public class HeadsInventory extends JavaPlugin {
 		}
 
 		/* Register commands */
-		getCommand("heads").setExecutor(new HeadsInventoryCommand(this));
-		getCommand("headsinventory").setExecutor(new HeadsInventoryCommand(this));
-		getCommand("myhead").setExecutor(new HeadsInventoryCommand(this));
-		getCommand("playerhead").setExecutor(new HeadsInventoryCommand(this));
-		getCommand("updateheads").setExecutor(new HeadsInventoryCommand(this));
+        HeadsInventoryCommand hic = new HeadsInventoryCommand(this);
+		getCommand("heads").setExecutor(hic);
+		getCommand("headsinventory").setExecutor(hic);
+		getCommand("myhead").setExecutor(hic);
+		getCommand("playerhead").setExecutor(hic);
+		getCommand("updateheads").setExecutor(hic);
 
 		/* Register tab completers*/
-		getCommand("headsinventory").setTabCompleter(new HeadsInventoryTabCompleter(this));
-		getCommand("updateheads").setTabCompleter(new HeadsInventoryTabCompleter(this));
+        HeadsInventoryTabCompleter hitc = new HeadsInventoryTabCompleter(this);
+		getCommand("headsinventory").setTabCompleter(hitc);
+		getCommand("updateheads").setTabCompleter(hitc);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class HeadsInventory extends JavaPlugin {
 		if (permission == null) {
 			getLogger().log(Level.WARNING, "Could not hook Vault!");
 		} else {
-			getLogger().log(Level.WARNING, "Hooked Vault!");
+			getLogger().log(Level.INFO, "Hooked Vault!");
 		}
 
 		return (permission != null);

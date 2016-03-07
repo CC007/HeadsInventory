@@ -26,13 +26,14 @@ package com.github.cc007.headsinventory.commands;
 import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import com.github.cc007.headsplugin.HeadsPlugin;
+import com.github.cc007.headsplugin.exceptions.AuthenticationException;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
 import com.google.common.base.Joiner;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -47,211 +48,260 @@ import org.bukkit.entity.Player;
  */
 public class HeadsInventoryCommand implements CommandExecutor {
 
-	private final HeadsInventory plugin;
+    private final HeadsInventory plugin;
 
-	public HeadsInventoryCommand(HeadsInventory plugin) {
-		this.plugin = plugin;
-	}
+    public HeadsInventoryCommand(HeadsInventory plugin) {
+        this.plugin = plugin;
+    }
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
 
-		// update heads
-		if (command.getName().equalsIgnoreCase("updateheads")) {
-			return onUpdateHeadsCommand(sender, args);
-		}
+        // update heads
+        if (command.getName().equalsIgnoreCase("updateheads")) {
+            return onUpdateHeadsCommand(sender, args);
+        }
 
-		// from here on only player commands
-		if (!(sender instanceof Player)) {
-			sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Only players can perform this command");
-			return false;
-		}
-		Player player = (Player) sender;
-		return onPlayerCommand(player, command, commandLabel, args);
-	}
+        // from here on only player commands
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Only players can perform this command");
+            return false;
+        }
+        Player player = (Player) sender;
+        return onPlayerCommand(player, command, commandLabel, args);
+    }
 
-	private boolean onPlayerCommand(Player player, Command command, String commandLabel, String[] args) {
-		switch (command.getName().toLowerCase()) {
-			case "myhead":
-				return onMyHeadCommand(player);
-			case "playerhead":
-				return onPlayerHeadCommand(player, args);
-			case "heads":
-				return onHeadsCommand(player);
-			case "headsinventory":
-				return onHeadsInventoryCommand(player, args);
-			default:
-				plugin.getLogger().log(Level.WARNING, "Unknown command send: {0}", command.getName());
-				plugin.getLogger().log(Level.WARNING, "Used alias: {0}", commandLabel);
-				return false;
-		}
+    private boolean onPlayerCommand(Player player, Command command, String commandLabel, String[] args) {
+        switch (command.getName().toLowerCase()) {
+            case "myhead":
+                return onMyHeadCommand(player);
+            case "playerhead":
+                return onPlayerHeadCommand(player, args);
+            case "heads":
+                return onHeadsCommand(player);
+            case "headsinventory":
+                return onHeadsInventoryCommand(player, args);
+            default:
+                plugin.getLogger().log(Level.WARNING, "Unknown command send: {0}", command.getName());
+                plugin.getLogger().log(Level.WARNING, "Used alias: {0}", commandLabel);
+                return false;
+        }
 
-	}
+    }
 
-	private boolean onUpdateHeadsCommand(CommandSender sender, String[] args) {
-		if (!sender.hasPermission("headsinv.update")) {
-			sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission to update the catagorized heads.");
-			return false;
-		}
+    private boolean onUpdateHeadsCommand(final CommandSender sender, final String[] args) {
+        if (!sender.hasPermission("headsinv.update")) {
+            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission to update the catagorized heads.");
+            return false;
+        }
 
-		if (args.length < 2) {
-			sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all categories...");
-			try {
-				HeadsUtils.getInstance().loadCategories();
-			} catch (SocketTimeoutException ex) {
-				Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (IOException ex) {
-				Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
-			return true;
-		}
+        if (args.length < 2) {
+            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all categories...");
+            Thread t = new Thread() {
 
-		if (HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("predefinedcategories." + args[1]) || HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("customcategories." + args[1] + ".id")) {
-			sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all category: " + args[1] + "...");
-			try {
-				HeadsUtils.getInstance().loadCategory(args[1]);
-			} catch (SocketTimeoutException ex) {
-				Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
-				sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The heads database didn't respond in time.");
-			} catch (IOException ex) {
-				Logger.getLogger(HeadsInventoryCommand.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (NullPointerException ex) {
-				sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Category is empty!");
-				return false;
-			}
-			sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
-			return true;
-		}
+                @Override
+                public void run() {
+                    try {
+                        HeadsUtils.getInstance().loadCategories();
+                    } catch (SocketTimeoutException ex) {
+                        try {
+                            HeadsUtils.getInstance().loadCategories();
+                        } catch (SocketTimeoutException ex2) {
+                            plugin.getLogger().severe("The server did not respond. Please check if the heads website is online.");
+                            plugin.getLogger().log(Level.SEVERE, null, ex2);
+                        } catch (MalformedURLException ex2) {
+                            plugin.getLogger().severe("The url is malformed. Please check the config file");
+                            plugin.getLogger().log(Level.SEVERE, null, ex2);
+                        } catch (IOException ex2) {
+                            plugin.getLogger().severe("An unknown exception has occurred. Please check if the heads website is online.");
+                            plugin.getLogger().log(Level.SEVERE, null, ex2);
+                        }
+                    } catch (MalformedURLException ex) {
+                        plugin.getLogger().severe("The url is malformed. Please check the config file");
+                        plugin.getLogger().log(Level.SEVERE, null, ex);
+                    } catch (IOException ex) {
+                        plugin.getLogger().severe("An unknown exception has occurred. Please check if the heads website is online.");
+                        plugin.getLogger().log(Level.SEVERE, null, ex);
+                    }
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
+                }
 
-		sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No category found with that name, possible categories: ");
-		Set<String> categoryNames = HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("predefinedcategories").getKeys(false);
-		categoryNames.addAll(HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("customcategories").getKeys(false));
-		sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GOLD + StringUtils.join(categoryNames, ", "));
-		return false;
-	}
+            };
+            t.start();
+            return true;
+        }
 
-	private boolean onMyHeadCommand(Player player) {
-		if (!player.hasPermission("headsinv.myhead")) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have the permission to spawn in your own head");
-			return false;
-		}
-		HeadsSearch.myHead(player);
-		return true;
-	}
+        if (HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("predefinedcategories." + args[1]) || HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("customcategories." + args[1] + ".id")) {
+            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all category: " + args[1] + "...");
+            Thread t = new Thread() {
 
-	private boolean onPlayerHeadCommand(Player player, String[] args) {
-		if (!player.hasPermission("headsinv.playerhead")) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have the permission to spawn in someone elses head");
-			return false;
-		}
-		if (args.length == 0) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You didn't specify a username");
-			return false;
-		}
-		HeadsSearch.playerHead(player, args);
-		return true;
-	}
+                @Override
+                public void run() {
 
-	private boolean onHeadsCommand(Player player) {
-		player.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
-				+ ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
-				+ ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
-				+ ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
-				+ ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
-				+ ChatColor.GOLD + "/headsinv searchfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
-				+ ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
-				+ ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.");
-		return true;
-	}
+                    try {
+                        HeadsUtils.getInstance().loadCategory(args[1]);
+                    } catch (SocketTimeoutException ex) {
+                        plugin.getLogger().log(Level.SEVERE, null, ex);
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The heads database didn't respond in time.");
+                        return;
+                    } catch (IOException ex) {
+                        plugin.getLogger().log(Level.SEVERE, null, ex);
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "An unknown error occurred while reloading a category! Please contact an admin.");
+                        return;
+                    } catch (NullPointerException ex) {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Category is empty!");
+                        return;
+                    } catch (AuthenticationException ex) {
+                        plugin.getLogger().warning(ex.getMessage());
+                        switch (HeadsPlugin.getHeadsPlugin().getAccessMode()) {
+                            case LITE:
+                                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The category that was specified is not part of the lite version of this plugin.");
+                                break;
+                            case EXPIRED:
+                                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The trial for the plugin expired. The category that you tried to load is part of the full or trial version of the plugin.");
+                                break;
+                            case NONE:
+                                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The plugin has not been properly configured. Please contact the server owner");
+                                break;
+                        }
+                    }
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
+                }
 
-	private boolean onHeadsInventoryCommand(Player player, String args[]) {
-		if (!player.hasPermission("headsinv.inventory")) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission to look up custom heads.");
-			return false;
-		}
+            };
+            t.start();
+            return true;
+        }
 
-		// head search with inventory of all categories
-		if (args.length == 0) {
-			return HeadsSearch.searchAllCategories(player);
-		}
+        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No category found with that name, possible categories: ");
+        Set<String> categoryNames = HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("predefinedcategories").getKeys(false);
+        categoryNames.addAll(HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("customcategories").getKeys(false));
+        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GOLD + StringUtils.join(categoryNames, ", "));
+        return false;
+    }
 
-		switch (args[0].toLowerCase()) {
-			case "categories":
-			case "category":
-			case "cat":
-				//head search with inventory of the specified category
-				return onCategoriesCommand(player, args);
-			case "search":
-				//head search with inventory
-				return onSearchCommand(player, args);
-			case "searchfirst":
-				//return first head from search
-				return onSearchFirstCommand(player, args);
-			default:
-				player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Incorrect usage.");
-				player.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
-						+ ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
-						+ ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
-						+ ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
-						+ ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
-						+ ChatColor.GOLD + "/headsinv searchfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
-						+ ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
-						+ ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.");
-				return true;
-		}
-	}
+    private boolean onMyHeadCommand(Player player) {
+        if (!player.hasPermission("headsinv.myhead")) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have the permission to spawn in your own head");
+            return false;
+        }
+        HeadsSearch.myHead(player);
+        return true;
+    }
 
-	private boolean onCategoriesCommand(Player player, String[] args) {
-		if (args.length == 1) {
-			//return the category names
-			HeadsSearch.sendCategoriesList(player);
-			return true;
-		}
+    private boolean onPlayerHeadCommand(Player player, String[] args) {
+        if (!player.hasPermission("headsinv.playerhead")) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have the permission to spawn in someone elses head");
+            return false;
+        }
+        if (args.length == 0) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You didn't specify a username");
+            return false;
+        }
+        HeadsSearch.playerHead(player, args);
+        return true;
+    }
 
-		if (args.length > 2) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "Please provide only one category name.");
-			return false;
-		}
+    private boolean onHeadsCommand(Player player) {
+        player.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
+                + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
+                + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
+                + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
+                + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
+                + ChatColor.GOLD + "/headsinv searchfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
+                + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
+                + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.");
+        return true;
+    }
 
-		if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("*")) {
-			return HeadsSearch.searchAllCategories(player);
-		}
+    private boolean onHeadsInventoryCommand(Player player, String args[]) {
+        if (!player.hasPermission("headsinv.inventory")) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission to look up custom heads.");
+            return false;
+        }
 
-		return HeadsSearch.searchCategory(player, args[1]);
+        // head search with inventory of all categories
+        if (args.length == 0) {
+            return HeadsSearch.searchAllCategories(player);
+        }
 
-	}
+        switch (args[0].toLowerCase()) {
+            case "categories":
+            case "category":
+            case "cat":
+                //head search with inventory of the specified category
+                return onCategoriesCommand(player, args);
+            case "search":
+                //head search with inventory
+                return onSearchCommand(player, args);
+            case "searchfirst":
+                //return first head from search
+                return onSearchFirstCommand(player, args);
+            default:
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Incorrect usage.");
+                player.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
+                        + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
+                        + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
+                        + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
+                        + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
+                        + ChatColor.GOLD + "/headsinv searchfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
+                        + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
+                        + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.");
+                return true;
+        }
+    }
 
-	private boolean onSearchCommand(Player player, String[] args) {
-		if (args.length < 2) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify a head.");
-			return false;
-		}
-		if (args[1].length() < 3) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The keyword needs start with at least 3 characters.");
-			return false;
-		}
+    private boolean onCategoriesCommand(Player player, String[] args) {
+        if (args.length == 1) {
+            //return the category names
+            HeadsSearch.sendCategoriesList(player);
+            return true;
+        }
 
-		String[] searchArgs = new String[args.length - 1];
-		System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
+        if (args.length > 2) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "Please provide only one category name.");
+            return false;
+        }
 
-		return HeadsSearch.search(player, Joiner.on(" ").join(searchArgs));
-	}
+        if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("*")) {
+            return HeadsSearch.searchAllCategories(player);
+        }
 
-	private boolean onSearchFirstCommand(Player player, String[] args) {
-		if (args.length < 2) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify a head.");
-			return false;
-		}
-		if (args[1].length() < 3) {
-			player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The keyword needs start with at least 3 characters.");
-			return false;
-		}
+        return HeadsSearch.searchCategory(player, args[1]);
 
-		String[] searchArgs = new String[args.length - 1];
-		System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
+    }
 
-		return HeadsSearch.searchFirst(player, Joiner.on(" ").join(searchArgs));
-	}
+    private boolean onSearchCommand(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify a head.");
+            return false;
+        }
+        if (args[1].length() < 3) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The keyword needs start with at least 3 characters.");
+            return false;
+        }
+
+        String[] searchArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
+
+        HeadsSearch.search(player, Joiner.on(" ").join(searchArgs));
+        return true;
+    }
+
+    private boolean onSearchFirstCommand(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify a head.");
+            return false;
+        }
+        if (args[1].length() < 3) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The keyword needs start with at least 3 characters.");
+            return false;
+        }
+
+        String[] searchArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
+        HeadsSearch.searchFirst(player, Joiner.on(" ").join(searchArgs));
+        return true;
+    }
 
 }

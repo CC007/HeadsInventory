@@ -145,7 +145,7 @@ public class HeadsInventoryPage implements Listener {
 
         if (slot / 9 != menu.getRowCount()) {
             menu.getPlayer().getInventory().addItem(items.get(slot));
-            menu.getPlayer().sendMessage(ChatColor.GREEN + "Here's the skull");
+            menu.getPlayer().sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Here's the skull");
             return;
         }
         if (slot == menu.getRowCount() * 9) {

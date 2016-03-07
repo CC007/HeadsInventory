@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.cc007</groupId>
     <artifactId>HeadsInventory</artifactId>
-    <version>1.0.6</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,7 +49,7 @@
         
         <repository>
             <id>cc007-private-ext-snapshot-repo</id>
-            <url>http://cc007.duckdns.org:8080/artifactory/ext-snapshot-local</url>
+            <url>http://192.168.178.19:8080/artifactory/ext-snapshot-local</url>
         </repository>
         
         <repository>
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>HeadsPlugin</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
