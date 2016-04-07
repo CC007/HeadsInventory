@@ -95,8 +95,12 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return false;
         }
 
-        if (args.length < 2) {
-            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all categories...");
+        if (args.length < 1) {
+            if (sender instanceof Player) {
+                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all categories...");
+            }else{
+                sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + "Updating all categories...");
+            }
             Thread t = new Thread() {
 
                 @Override
@@ -123,7 +127,11 @@ public class HeadsInventoryCommand implements CommandExecutor {
                         plugin.getLogger().severe("An unknown exception has occurred. Please check if the heads website is online.");
                         plugin.getLogger().log(Level.SEVERE, null, ex);
                     }
-                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
+                    if (sender instanceof Player) {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
+                    } else {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + "Update complete.");
+                    }
                 }
 
             };
@@ -131,15 +139,17 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return true;
         }
 
-        if (HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("predefinedcategories." + args[1]) || HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("customcategories." + args[1] + ".id")) {
-            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all category: " + args[1] + "...");
+        if (HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("predefinedcategories." + args[0]) || HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("customcategories." + args[0] + ".id")) {
+            if (sender instanceof Player) {
+                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating category: " + args[0] + "...");
+            }
             Thread t = new Thread() {
 
                 @Override
                 public void run() {
 
                     try {
-                        HeadsUtils.getInstance().loadCategory(args[1]);
+                        HeadsUtils.getInstance().loadCategory(args[0]);
                     } catch (SocketTimeoutException ex) {
                         plugin.getLogger().log(Level.SEVERE, null, ex);
                         sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The heads database didn't respond in time.");
@@ -165,7 +175,11 @@ public class HeadsInventoryCommand implements CommandExecutor {
                                 break;
                         }
                     }
-                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
+                    if (sender instanceof Player) {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
+                    } else {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + "Update complete.");
+                    }
                 }
 
             };
