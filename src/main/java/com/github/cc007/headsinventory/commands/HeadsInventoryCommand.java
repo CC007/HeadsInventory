@@ -24,6 +24,7 @@
 package com.github.cc007.headsinventory.commands;
 
 import com.github.cc007.headsinventory.HeadsInventory;
+import com.github.cc007.headsinventory.inventory.CategoriesMenu;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import com.github.cc007.headsplugin.HeadsPlugin;
 import com.github.cc007.headsplugin.exceptions.AuthenticationException;
@@ -267,8 +268,12 @@ public class HeadsInventoryCommand implements CommandExecutor {
 
     private boolean onCategoriesCommand(Player player, String[] args) {
         if (args.length == 1) {
-            //return the category names
-            HeadsSearch.sendCategoriesList(player);
+            /*//return the category names
+            HeadsSearch.sendCategoriesList(player);*/
+            
+            //open the categories ui
+            CategoriesMenu menu = new CategoriesMenu(player);
+            menu.open();
             return true;
         }
 

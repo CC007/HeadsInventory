@@ -25,10 +25,17 @@ package com.github.cc007.headsinventory;
 
 import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.commands.HeadsInventoryTabCompleter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -41,9 +48,15 @@ public class HeadsInventory extends JavaPlugin {
 
 	private Plugin vault = null;
 	private Permission permission = null;
+    private FileConfiguration config = null;
+    private File configFile = null;
 
 	@Override
 	public void onEnable() {
+        /* Config stuffs */
+        getConfig().options().copyDefaults(true);
+        saveDefaultConfig();
+        
 		/* Setup plugin hooks */
 		vault = getPlugin("Vault");
 		if (vault != null) {
@@ -146,4 +159,68 @@ public class HeadsInventory extends JavaPlugin {
 			return null;
 		}
 	}
+
+    /**
+     * Method to reload the config.yml config file
+     */
+    @Override
+    public void reloadConfig() {
+        if (configFile == null) {
+            configFile = new File(getDataFolder(), "config.yml");
+        }
+        config = YamlConfiguration.loadConfiguration(configFile);
+
+        // Look for defaults in the jar
+        Reader defConfigStream = null;
+        try {
+            defConfigStream = new InputStreamReader(this.getResource("config.yml"), "UTF8");
+        } catch (UnsupportedEncodingException ex) {
+            getLogger().log(Level.SEVERE, null, ex);
+        }
+        if (defConfigStream != null) {
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+            config.setDefaults(defConfig);
+        }
+    }
+
+    /**
+     * Method to get YML content of the config.yml config file
+     *
+     * @return YML content of the catagories.yml config file
+     */
+    @Override
+    public FileConfiguration getConfig() {
+        if (config == null) {
+            reloadConfig();
+        }
+        return config;
+    }
+
+    /**
+     * Method to save the config.yml config file
+     */
+    @Override
+    public void saveConfig() {
+        if (config == null || configFile == null) {
+            return;
+        }
+        try {
+            getConfig().save(configFile);
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Could not save config to " + configFile, ex);
+        }
+    }
+
+    /**
+     * Method to save the default config file
+     */
+    @Override
+    public void saveDefaultConfig() {
+        if (configFile == null) {
+            configFile = new File(getDataFolder(), "config.yml");
+        }
+        if (!configFile.exists()) {
+            saveResource("config.yml", false);
+        }
+    }
 }

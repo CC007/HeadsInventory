@@ -24,7 +24,9 @@
 package com.github.cc007.headsinventory.inventory;
 
 import com.github.cc007.headsinventory.HeadsInventory;
+import com.github.cc007.headsinventory.events.HeadGivenEvent;
 import com.github.cc007.headsinventory.search.HeadsSearch;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Bukkit;
@@ -114,7 +116,7 @@ public class HeadsInventoryPage implements Listener {
         }
         Bukkit.getLogger().fine("Menu name correct");
 
-        if (menu.getPlayer() != null && event.getPlayer() != menu.getPlayer()) {
+        if (menu.getPlayer() != null && !event.getPlayer().equals(menu.getPlayer())) {
             return;
         }
         Bukkit.getLogger().fine("Player name correct");
@@ -129,7 +131,7 @@ public class HeadsInventoryPage implements Listener {
         }
         Bukkit.getLogger().fine("Menu name correct");
 
-        if (menu.getPlayer() != null && event.getWhoClicked() != menu.getPlayer()) {
+        if (menu.getPlayer() != null && !event.getWhoClicked().equals(menu.getPlayer())) {
             return;
         }
         Bukkit.getLogger().fine("Player name correct");
@@ -145,6 +147,7 @@ public class HeadsInventoryPage implements Listener {
 
         if (slot / 9 != menu.getRowCount()) {
             menu.getPlayer().getInventory().addItem(items.get(slot));
+            Bukkit.getServer().getPluginManager().callEvent(new HeadGivenEvent(menu.getPlayer(), items.get(slot), menu.getPlayer().getWorld(), new Date()));
             menu.getPlayer().sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Here's the skull");
             return;
         }
