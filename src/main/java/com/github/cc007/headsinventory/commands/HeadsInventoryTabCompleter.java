@@ -58,7 +58,7 @@ public class HeadsInventoryTabCompleter implements TabCompleter {
             StringUtil.copyPartialMatches(partialCommand, commands, completions);
         }
         if (command.getName().equalsIgnoreCase("headsinventory") && args.length == 2) {
-            if (args[0].equalsIgnoreCase("categories")) {
+            if (args[0].equalsIgnoreCase("categories") || args[0].equalsIgnoreCase("cat")) {
                 String partialCommand = args[1];
                 List<String> commands = new ArrayList<>();
                 for (HeadsCategory category : HeadsPlugin.getHeadsPlugin().getHeadsUtils().getCategories().getList()) {

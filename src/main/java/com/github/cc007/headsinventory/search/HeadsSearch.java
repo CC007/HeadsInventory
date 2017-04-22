@@ -30,6 +30,8 @@ import com.github.cc007.headsplugin.bukkit.HeadCreator;
 import com.github.cc007.headsplugin.exceptions.AuthenticationException;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
 import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
+import com.github.cc007.headsplugin.utils.loader.FreshCoalLoader;
+import com.github.cc007.headsplugin.utils.loader.MineSkinLoader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -75,23 +77,34 @@ public class HeadsSearch {
         player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "The heads are placed in your inventory.");
     }
 
-    public static void search(final Player player, final String searchString) {
+    public static void search(final Player player, final String searchString, final String searchDatabase) {
         Thread t = new Thread() {
 
             @Override
             public void run() {
                 List<ItemStack> heads = null;
                 try {
+                    switch (searchDatabase) {
+                        case "freshcoal":
+                            HeadsUtils.getInstance().setDatabaseLoader(new FreshCoalLoader());
+                            break;
+                        case "mineskin":
+                            HeadsUtils.getInstance().setDatabaseLoader(new MineSkinLoader());
+                            break;
+                        default:
+                            HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
+                    }
                     heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getHeads(searchString));
+                    HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
                 } catch (SocketTimeoutException ex) {
                     Bukkit.getLogger().log(Level.SEVERE, ex.getMessage());
                     player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Could not connect to heads database. Please try again later.");
                     return;
                 } catch (MalformedURLException ex) {
                     // prob no heads found
-                    Bukkit.getLogger().log(Level.WARNING, "Malformed url exception, probably caused by there not being any results to a search request");
-                } catch (UnknownHostException ex){
-                    Bukkit.getLogger().log(Level.WARNING, "The website returns a non-JSON format. Assume no results were found.");
+                    Bukkit.getLogger().log(Level.WARNING, "Malformed url exception, probably caused by there not being any results to a search request", ex);
+                } catch (UnknownHostException ex) {
+                    Bukkit.getLogger().log(Level.WARNING, "The website returns a non-JSON format. Assume no results were found.", ex);
                 } catch (IOException ex) {
                     Bukkit.getLogger().log(Level.SEVERE, null, ex);
                     player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "An unknown error occurred. Please contact an admin.");
@@ -124,19 +137,30 @@ public class HeadsSearch {
         t.start();
     }
 
-    public static void searchFirst(final Player player, final String searchString) {
+    public static void searchFirst(final Player player, final String searchString, final String searchDatabase) {
         Thread t = new Thread() {
 
             @Override
             public void run() {
                 ItemStack head = null;
                 try {
+                    switch (searchDatabase) {
+                        case "freshcoal":
+                            HeadsUtils.getInstance().setDatabaseLoader(new FreshCoalLoader());
+                            break;
+                        case "mineskin":
+                            HeadsUtils.getInstance().setDatabaseLoader(new MineSkinLoader());
+                            break;
+                        default:
+                            HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
+                    }
                     head = HeadCreator.getItemStack(HeadsUtils.getInstance().getHead(searchString));
+                    HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
                 } catch (SocketTimeoutException ex) {
                     Bukkit.getLogger().log(Level.SEVERE, null, ex);
                     player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Could not connect to heads database. Please try again later.");
                     return;
-                } catch (UnknownHostException ex){
+                } catch (UnknownHostException ex) {
                     Bukkit.getLogger().log(Level.WARNING, "The website returns a non-JSON format. Assume no results were found.");
                 } catch (IOException ex) {
                     Bukkit.getLogger().log(Level.SEVERE, null, ex);

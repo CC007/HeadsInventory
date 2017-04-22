@@ -99,7 +99,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
         if (args.length < 1) {
             if (sender instanceof Player) {
                 sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all categories...");
-            }else{
+            } else {
                 sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + "Updating all categories...");
             }
             Thread t = new Thread() {
@@ -246,9 +246,13 @@ public class HeadsInventoryCommand implements CommandExecutor {
             case "cat":
                 //head search with inventory of the specified category
                 return onCategoriesCommand(player, args);
+            case "msearch":
+            case "fsearch":
             case "search":
                 //head search with inventory
                 return onSearchCommand(player, args);
+            case "msearchfirst":
+            case "fsearchfirst":
             case "searchfirst":
                 //return first head from search
                 return onSearchFirstCommand(player, args);
@@ -270,7 +274,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
         if (args.length == 1) {
             /*//return the category names
             HeadsSearch.sendCategoriesList(player);*/
-            
+
             //open the categories ui
             CategoriesMenu menu = new CategoriesMenu(player);
             menu.open();
@@ -300,10 +304,10 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return false;
         }
 
+        String searchDatabase = args[0].equals("msearch") ? "mineskin" : args[0].equals("fsearch") ? "freshcoal" : "default";
         String[] searchArgs = new String[args.length - 1];
         System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
-
-        HeadsSearch.search(player, Joiner.on(" ").join(searchArgs));
+        HeadsSearch.search(player, Joiner.on(" ").join(searchArgs), searchDatabase);
         return true;
     }
 
@@ -317,9 +321,10 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return false;
         }
 
+        String searchDatabase = args[0].equals("msearch") ? "mineskin" : args[0].equals("fsearch") ? "freshcoal" : "default";
         String[] searchArgs = new String[args.length - 1];
         System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
-        HeadsSearch.searchFirst(player, Joiner.on(" ").join(searchArgs));
+        HeadsSearch.searchFirst(player, Joiner.on(" ").join(searchArgs), searchDatabase);
         return true;
     }
 
