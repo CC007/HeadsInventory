@@ -218,14 +218,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
 
     private boolean onHeadsCommand(Player player) {
-        player.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
-                + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
-                + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
-                + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
-                + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
-                + ChatColor.GOLD + "/headsinv searchfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
-                + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
-                + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.");
+        player.sendMessage(HeadsInventory.getHelpMessage());
         return true;
     }
 
@@ -254,18 +247,14 @@ public class HeadsInventoryCommand implements CommandExecutor {
             case "msearchfirst":
             case "fsearchfirst":
             case "searchfirst":
+            case "mgetfirst":
+            case "fgetfirst":
+            case "getfirst":
                 //return first head from search
                 return onSearchFirstCommand(player, args);
             default:
                 player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Incorrect usage.");
-                player.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
-                        + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
-                        + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
-                        + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
-                        + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
-                        + ChatColor.GOLD + "/headsinv searchfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
-                        + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
-                        + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.");
+                player.sendMessage(HeadsInventory.getHelpMessage());
                 return true;
         }
     }
@@ -304,7 +293,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return false;
         }
 
-        String searchDatabase = args[0].equals("msearch") ? "mineskin" : args[0].equals("fsearch") ? "freshcoal" : "default";
+        String searchDatabase = args[0].startsWith("m") ? "mineskin" : args[0].startsWith("f") ? "freshcoal" : "default";
         String[] searchArgs = new String[args.length - 1];
         System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
         HeadsSearch.search(player, Joiner.on(" ").join(searchArgs), searchDatabase);
@@ -321,7 +310,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return false;
         }
 
-        String searchDatabase = args[0].equals("msearch") ? "mineskin" : args[0].equals("fsearch") ? "freshcoal" : "default";
+        String searchDatabase = args[0].startsWith("m") ? "mineskin" : args[0].startsWith("f") ? "freshcoal" : "default";
         String[] searchArgs = new String[args.length - 1];
         System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
         HeadsSearch.searchFirst(player, Joiner.on(" ").join(searchArgs), searchDatabase);

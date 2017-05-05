@@ -46,119 +46,119 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class HeadsInventory extends JavaPlugin {
 
-	private Plugin vault = null;
-	private Permission permission = null;
+    private Plugin vault = null;
+    private Permission permission = null;
     private FileConfiguration config = null;
     private File configFile = null;
 
-	@Override
-	public void onEnable() {
+    @Override
+    public void onEnable() {
         /* Config stuffs */
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
-        
-		/* Setup plugin hooks */
-		vault = getPlugin("Vault");
-		if (vault != null) {
-			setupPermissions();
-		}
 
-		/* Register commands */
+        /* Setup plugin hooks */
+        vault = getPlugin("Vault");
+        if (vault != null) {
+            setupPermissions();
+        }
+
+        /* Register commands */
         HeadsInventoryCommand hic = new HeadsInventoryCommand(this);
-		getCommand("heads").setExecutor(hic);
-		getCommand("headsinventory").setExecutor(hic);
-		getCommand("myhead").setExecutor(hic);
-		getCommand("playerhead").setExecutor(hic);
-		getCommand("updateheads").setExecutor(hic);
+        getCommand("heads").setExecutor(hic);
+        getCommand("headsinventory").setExecutor(hic);
+        getCommand("myhead").setExecutor(hic);
+        getCommand("playerhead").setExecutor(hic);
+        getCommand("updateheads").setExecutor(hic);
 
-		/* Register tab completers*/
+        /* Register tab completers*/
         HeadsInventoryTabCompleter hitc = new HeadsInventoryTabCompleter(this);
-		getCommand("headsinventory").setTabCompleter(hitc);
-		getCommand("updateheads").setTabCompleter(hitc);
-	}
+        getCommand("headsinventory").setTabCompleter(hitc);
+        getCommand("updateheads").setTabCompleter(hitc);
+    }
 
-	@Override
-	public void onDisable() {
-		vault = null;
-		permission = null;
-	}
+    @Override
+    public void onDisable() {
+        vault = null;
+        permission = null;
+    }
 
-	/**
-	 * Setup permissions
-	 *
-	 * @return True: Setup correctly, Didn't setup correctly
-	 */
-	private boolean setupPermissions() {
-		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+    /**
+     * Setup permissions
+     *
+     * @return True: Setup correctly, Didn't setup correctly
+     */
+    private boolean setupPermissions() {
+        RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
 
-		if (permissionProvider != null) {
-			permission = permissionProvider.getProvider();
-		}
+        if (permissionProvider != null) {
+            permission = permissionProvider.getProvider();
+        }
 
-		if (permission == null) {
-			getLogger().log(Level.WARNING, "Could not hook Vault!");
-		} else {
-			getLogger().log(Level.INFO, "Hooked Vault!");
-		}
+        if (permission == null) {
+            getLogger().log(Level.WARNING, "Could not hook Vault!");
+        } else {
+            getLogger().log(Level.INFO, "Hooked Vault!");
+        }
 
-		return (permission != null);
-	}
+        return (permission != null);
+    }
 
-	/**
-	 * Get the vault
-	 *
-	 * @return the vault
-	 */
-	public Plugin getVault() {
-		return vault;
-	}
+    /**
+     * Get the vault
+     *
+     * @return the vault
+     */
+    public Plugin getVault() {
+        return vault;
+    }
 
-	/**
-	 * Get the permissions
-	 *
-	 * @return the permissions
-	 */
-	public Permission getPermission() {
-		return permission;
-	}
+    /**
+     * Get the permissions
+     *
+     * @return the permissions
+     */
+    public Permission getPermission() {
+        return permission;
+    }
 
-	/**
-	 * Gets a plugin
-	 *
-	 * @param pluginName Name of the plugin to get
-	 * @return The plugin from name
-	 */
-	protected Plugin getPlugin(String pluginName) {
-		if (getServer().getPluginManager().getPlugin(pluginName) != null && getServer().getPluginManager().getPlugin(pluginName).isEnabled()) {
-			return getServer().getPluginManager().getPlugin(pluginName);
-		} else {
-			getLogger().log(Level.WARNING, "Could not find plugin \"{0}\"!", pluginName);
-			return null;
-		}
-	}
+    /**
+     * Gets a plugin
+     *
+     * @param pluginName Name of the plugin to get
+     * @return The plugin from name
+     */
+    protected Plugin getPlugin(String pluginName) {
+        if (getServer().getPluginManager().getPlugin(pluginName) != null && getServer().getPluginManager().getPlugin(pluginName).isEnabled()) {
+            return getServer().getPluginManager().getPlugin(pluginName);
+        } else {
+            getLogger().log(Level.WARNING, "Could not find plugin \"{0}\"!", pluginName);
+            return null;
+        }
+    }
 
-	/**
-	 * get the minecraft chat prefix for this plugin
-	 *
-	 * @return the minecraft chat prefix for this plugin
-	 */
-	public static String pluginChatPrefix(boolean colored) {
-		if (colored) {
-			return ChatColor.DARK_AQUA + "[" + ChatColor.GOLD + "Heads" + ChatColor.GREEN + "Inventory" + ChatColor.DARK_AQUA + "]" + ChatColor.WHITE + " ";
-		} else {
-			return "[HeadsInventory] ";
-		}
-	}
+    /**
+     * get the minecraft chat prefix for this plugin
+     *
+     * @return the minecraft chat prefix for this plugin
+     */
+    public static String pluginChatPrefix(boolean colored) {
+        if (colored) {
+            return ChatColor.DARK_AQUA + "[" + ChatColor.GOLD + "Heads" + ChatColor.GREEN + "Inventory" + ChatColor.DARK_AQUA + "]" + ChatColor.WHITE + " ";
+        } else {
+            return "[HeadsInventory] ";
+        }
+    }
 
-	public static HeadsInventory getPlugin() {
-		Plugin headsInventory = Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory");
-		if (headsInventory != null && headsInventory.isEnabled() && headsInventory instanceof HeadsInventory) {
-			return (HeadsInventory) headsInventory;
-		} else {
-			Bukkit.getLogger().log(Level.WARNING, "The heads inventory has not been enabled yet");
-			return null;
-		}
-	}
+    public static HeadsInventory getPlugin() {
+        Plugin headsInventory = Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory");
+        if (headsInventory != null && headsInventory.isEnabled() && headsInventory instanceof HeadsInventory) {
+            return (HeadsInventory) headsInventory;
+        } else {
+            Bukkit.getLogger().log(Level.WARNING, "The heads inventory has not been enabled yet");
+            return null;
+        }
+    }
 
     /**
      * Method to reload the config.yml config file
@@ -223,4 +223,20 @@ public class HeadsInventory extends JavaPlugin {
             saveResource("config.yml", false);
         }
     }
+
+    public static String getHelpMessage() {
+        return ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
+                + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
+                + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
+                + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
+                + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
+                + ChatColor.GOLD + "/headsinv fsearch <keyword>" + ChatColor.RESET + ": Display heads from keyword \n                                       from the FreshCoal database.\n"
+                + ChatColor.GOLD + "/headsinv msearch <keyword>" + ChatColor.RESET + ": Display heads from keyword \n                                       from the MineSkin database.\n"
+                + ChatColor.GOLD + "/headsinv getfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
+                + ChatColor.GOLD + "/headsinv fgetfirst <keyword>" + ChatColor.RESET + ": First head from keyword \n                                        from the FreshCoal database.\n"
+                + ChatColor.GOLD + "/headsinv mgetfirst <keyword>" + ChatColor.RESET + ": First head from keyword \n                                        from the MineSkin database.\n"
+                + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
+                + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.";
+    }
+
 }
