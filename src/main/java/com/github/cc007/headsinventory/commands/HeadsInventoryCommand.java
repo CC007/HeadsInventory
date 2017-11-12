@@ -35,7 +35,9 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -80,6 +82,8 @@ public class HeadsInventoryCommand implements CommandExecutor {
                 return onPlayerHeadCommand(player, args);
             case "heads":
                 return onHeadsCommand(player);
+            case "addhead":
+                return onAddHeadCommand(player, args);
             case "headsinventory":
                 return onHeadsInventoryCommand(player, args);
             default:
@@ -87,7 +91,6 @@ public class HeadsInventoryCommand implements CommandExecutor {
                 plugin.getLogger().log(Level.WARNING, "Used alias: {0}", commandLabel);
                 return false;
         }
-
     }
 
     private boolean onUpdateHeadsCommand(final CommandSender sender, final String[] args) {
@@ -219,6 +222,22 @@ public class HeadsInventoryCommand implements CommandExecutor {
 
     private boolean onHeadsCommand(Player player) {
         player.sendMessage(HeadsInventory.getHelpMessage());
+        return true;
+    }
+    
+    private boolean onAddHeadCommand(Player player, String args[]) {
+        if (!player.hasPermission("headsinv.add")) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission add heads to the database.");
+            return false;
+        }
+        
+        if (args.length < 1) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify the name for the new head.");
+            return false;
+        }
+        //TODO check name for edge cases
+        
+        HeadsSearch.saveHead(player, Joiner.on(" ").join(args));
         return true;
     }
 

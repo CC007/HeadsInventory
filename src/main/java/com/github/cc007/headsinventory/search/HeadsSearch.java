@@ -24,11 +24,13 @@
 package com.github.cc007.headsinventory.search;
 
 import com.github.cc007.headsinventory.HeadsInventory;
+import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.inventory.HeadsInventoryMenu;
 import com.github.cc007.headsplugin.HeadsPlugin;
 import com.github.cc007.headsplugin.bukkit.HeadCreator;
 import com.github.cc007.headsplugin.exceptions.AuthenticationException;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
+import com.github.cc007.headsplugin.utils.heads.Head;
 import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
 import com.github.cc007.headsplugin.utils.loader.FreshCoalLoader;
 import com.github.cc007.headsplugin.utils.loader.MineSkinLoader;
@@ -39,6 +41,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -75,6 +78,50 @@ public class HeadsSearch {
             putHeadInInventory(head, player);
         }
         player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "The heads are placed in your inventory.");
+    }
+
+    public static void saveHead(Player player, String headName) {
+        Head newHead = null;
+        try {
+            HeadsUtils hu = HeadsUtils.getInstance();
+            hu.setDatabaseLoader(new MineSkinLoader());
+            newHead = hu.saveHead(player, headName);
+            hu.setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
+        } catch (SocketTimeoutException ex) {
+            Bukkit.getLogger().log(Level.SEVERE, ex.getMessage());
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Could not connect to heads database. Please try again later.");
+            return;
+        } catch (MalformedURLException ex) {
+            // prob no heads found
+            Bukkit.getLogger().log(Level.WARNING, "Malformed url exception", ex);
+        } catch (UnknownHostException ex) {
+            Bukkit.getLogger().log(Level.WARNING, "The website returns a non-JSON format. Assume no results were found.", ex);
+        } catch (IOException ex) {
+            Bukkit.getLogger().log(Level.SEVERE, null, ex);
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "An unknown error occurred. Please contact an admin.");
+            return;
+        } catch (AuthenticationException ex) {
+            HeadsInventory.getPlugin().getLogger().warning(ex.getMessage());
+            switch (HeadsPlugin.getHeadsPlugin().getAccessMode()) {
+                case LITE:
+                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Adding heads to the database is not part of the lite version of this plugin.");
+                    break;
+                case EXPIRED:
+                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The trial for the plugin expired. Adding heads to the database is only part of the full or trial version of the plugin.");
+                    break;
+                case NONE:
+                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The plugin has not been properly configured. Please contact the server owner");
+                    break;
+            }
+            return;
+        }
+        if (newHead == null) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Unable to add the new head to the database.");
+            return;
+        }
+        ItemStack newHeadStack = HeadCreator.getItemStack(newHead);
+        putHeadInInventory(newHeadStack, player);
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "The head added to the database and is placed in your inventory.");
     }
 
     public static void search(final Player player, final String searchString, final String searchDatabase) {

@@ -1,5 +1,5 @@
 name: HeadsInventory
-version: 1.4.0
+version: ${version}
 main: com.github.cc007.headsinventory.HeadsInventory
 author: Rik Schaaf aka CC007 (http://coolcat007.nl/)
 description: >
@@ -12,6 +12,9 @@ commands:
     myhead:
         description: "Receive your own head"
         aliases: [myhd]
+    addhead:
+        description: "Add a new head to the database"
+        aliases: [addhd]
     playerhead:
         description: "Receive another player's head"
         aliases: [plyrhd]
@@ -32,5 +35,7 @@ permissions:
         description: Allows the user to update the heads categories
     headsinv.search:
         description: Allows the user to search directly for heads from the database
+    headsinv.add:
+        description: Allows the user to add a new head to the database
     headsinv.help:
         description: Allows the user to see the help page

@@ -69,6 +69,7 @@ public class HeadsInventory extends JavaPlugin {
         getCommand("headsinventory").setExecutor(hic);
         getCommand("myhead").setExecutor(hic);
         getCommand("playerhead").setExecutor(hic);
+        getCommand("addhead").setExecutor(hic);
         getCommand("updateheads").setExecutor(hic);
 
         /* Register tab completers*/
@@ -236,7 +237,8 @@ public class HeadsInventory extends JavaPlugin {
                 + ChatColor.GOLD + "/headsinv fgetfirst <keyword>" + ChatColor.RESET + ": First head from keyword \n                                        from the FreshCoal database.\n"
                 + ChatColor.GOLD + "/headsinv mgetfirst <keyword>" + ChatColor.RESET + ": First head from keyword \n                                        from the MineSkin database.\n"
                 + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
-                + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head.";
+                + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head. \n"
+                + ChatColor.GOLD + "/addhead <name>" + ChatColor.RESET + ": Adds your current head to the database \n                                        with the given name";
     }
 
 }
