@@ -34,6 +34,7 @@ import com.github.cc007.headsplugin.utils.heads.Head;
 import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
 import com.github.cc007.headsplugin.utils.loader.FreshCoalLoader;
 import com.github.cc007.headsplugin.utils.loader.MineSkinLoader;
+import com.github.cc007.headsplugin.utils.loader.MinecraftHeadsLoader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -137,6 +138,9 @@ public class HeadsSearch {
                             break;
                         case "mineskin":
                             HeadsUtils.getInstance().setDatabaseLoader(new MineSkinLoader());
+                            break;
+                        case "minecraftheads":
+                            HeadsUtils.getInstance().setDatabaseLoader(new MinecraftHeadsLoader(player));
                             break;
                         default:
                             HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());

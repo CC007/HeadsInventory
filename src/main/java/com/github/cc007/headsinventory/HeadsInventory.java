@@ -141,6 +141,7 @@ public class HeadsInventory extends JavaPlugin {
     /**
      * get the minecraft chat prefix for this plugin
      *
+     * @param colored whether or not the prefix should be colored
      * @return the minecraft chat prefix for this plugin
      */
     public static String pluginChatPrefix(boolean colored) {
@@ -227,18 +228,19 @@ public class HeadsInventory extends JavaPlugin {
 
     public static String getHelpMessage() {
         return ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
-                + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ": Display heads from a category.\n"
-                + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ": Displays all heads from categories.\n"
-                + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ": Displays all categories.\n"
-                + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ": Display heads from keyword.\n"
-                + ChatColor.GOLD + "/headsinv fsearch <keyword>" + ChatColor.RESET + ": Display heads from keyword \n                                       from the FreshCoal database.\n"
-                + ChatColor.GOLD + "/headsinv msearch <keyword>" + ChatColor.RESET + ": Display heads from keyword \n                                       from the MineSkin database.\n"
-                + ChatColor.GOLD + "/headsinv getfirst <keyword>" + ChatColor.RESET + ": First head from keyword.\n"
-                + ChatColor.GOLD + "/headsinv fgetfirst <keyword>" + ChatColor.RESET + ": First head from keyword \n                                        from the FreshCoal database.\n"
-                + ChatColor.GOLD + "/headsinv mgetfirst <keyword>" + ChatColor.RESET + ": First head from keyword \n                                        from the MineSkin database.\n"
+                + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ":\n Display heads from a category.\n"
+                + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ":\n Displays all heads from categories.\n"
+                + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ":\n Displays all categories.\n"
+                + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ":\n Display heads from keyword.\n"
+                + ChatColor.GOLD + "/headsinv fsearch <keyword>" + ChatColor.RESET + ":\n Display heads from keyword from the FreshCoal database.\n"
+                + ChatColor.GOLD + "/headsinv msearch <keyword>" + ChatColor.RESET + ":\n Display heads from keyword from the MineSkin database.\n"
+                + ChatColor.GOLD + "/headsinv mhsearch <keyword>" + ChatColor.RESET + ":\n Display heads from keyword from the Minecraft-heads database.\n"
+                + ChatColor.GOLD + "/headsinv getfirst <keyword>" + ChatColor.RESET + ":\n First head from keyword.\n"
+                + ChatColor.GOLD + "/headsinv fgetfirst <keyword>" + ChatColor.RESET + ":\n First head from keyword from the FreshCoal database.\n"
+                + ChatColor.GOLD + "/headsinv mgetfirst <keyword>" + ChatColor.RESET + ":\n First head from keyword from the MineSkin database.\n"
                 + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
                 + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head. \n"
-                + ChatColor.GOLD + "/addhead <name>" + ChatColor.RESET + ": Adds your current head to the database \n                                        with the given name";
+                + ChatColor.GOLD + "/addhead <name>" + ChatColor.RESET + ": Adds your current head to the database with the given name";
     }
 
 }

@@ -4,7 +4,7 @@ main: com.github.cc007.headsinventory.HeadsInventory
 author: Rik Schaaf aka CC007 (http://coolcat007.nl/)
 description: >
              Search for heads in the 
-depend: [HeadsPlugin]
+depend: [HeadsPluginAPI]
 commands:
     headsinventory:
         description: "Search for heads"

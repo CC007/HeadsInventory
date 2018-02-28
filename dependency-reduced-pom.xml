@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.cc007</groupId>
   <artifactId>HeadsInventory</artifactId>
-  <version>1.0.4</version>
+  <version>1.6.0</version>
   <developers>
     <developer>
       <id>cc007</id>
@@ -102,6 +102,7 @@
                   <exclude>javax.persistence:persistence-api</exclude>
                   <exclude>mysql:mysql-connector-java</exclude>
                   <exclude>net.milkbowl.vault:Vault</exclude>
+                  <exclude>com.github.cc007:HeadsPlugin</exclude>
                 </excludes>
               </artifactSet>
             </configuration>
@@ -116,10 +117,6 @@
       <url>https://github.com/CC007/maven-repo/raw/master/lib-releases</url>
     </repository>
     <repository>
-      <id>cc007-private-ext-snapshot-repo</id>
-      <url>http://cc007.duckdns.org:8080/artifactory/ext-snapshot-local</url>
-    </repository>
-    <repository>
       <releases />
       <snapshots />
       <id>spigot-repo</id>
@@ -127,7 +124,7 @@
     </repository>
     <repository>
       <id>vault-repo</id>
-      <url>http://nexus.theyeticave.net/content/repositories/pub_releases/</url>
+      <url>http://nexus.hc.to/content/repositories/pub_releases</url>
     </repository>
   </repositories>
   <dependencies>
@@ -150,7 +147,7 @@
     <dependency>
       <groupId>net.milkbowl.vault</groupId>
       <artifactId>Vault</artifactId>
-      <version>1.5.0</version>
+      <version>1.6.6</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

@@ -258,6 +258,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
             case "cat":
                 //head search with inventory of the specified category
                 return onCategoriesCommand(player, args);
+            case "mhsearch":
             case "msearch":
             case "fsearch":
             case "search":
@@ -312,7 +313,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return false;
         }
 
-        String searchDatabase = args[0].startsWith("m") ? "mineskin" : args[0].startsWith("f") ? "freshcoal" : "default";
+        String searchDatabase = args[0].startsWith("mh") ? "minecraftheads" : args[0].startsWith("m") ? "mineskin" : args[0].startsWith("f") ? "freshcoal" : "default";
         String[] searchArgs = new String[args.length - 1];
         System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
         HeadsSearch.search(player, Joiner.on(" ").join(searchArgs), searchDatabase);
