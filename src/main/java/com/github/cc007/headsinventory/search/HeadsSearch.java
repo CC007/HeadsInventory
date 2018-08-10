@@ -61,8 +61,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 public class HeadsSearch {
 
     public static void myHead(Player player) {
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta.setOwner(player.getName());
         head.setItemMeta(skullMeta);
         putHeadInInventory(head, player);
@@ -71,8 +71,8 @@ public class HeadsSearch {
 
     public static void playerHead(Player player, String[] otherPlayers) {
         for (String otherPlayerName : otherPlayers) {
-            ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-            SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+            ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
+            SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
             //TODO check if player exists: Player otherPlayer = getPlayerByName(otherPlayerName);
             skullMeta.setOwner(otherPlayerName);
             head.setItemMeta(skullMeta);

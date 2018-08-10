@@ -70,8 +70,8 @@ public class HeadsInventoryPage implements Listener {
     }
 
     public void setLeftArrow() {
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta2 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta2 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta2.setOwner("MHF_ArrowLeft");
         head.setItemMeta(skullMeta2);
         HeadsSearch.setItemName(head, "Previous");
@@ -79,8 +79,8 @@ public class HeadsInventoryPage implements Listener {
     }
 
     public void setRightArrow() {
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta1.setOwner("MHF_ArrowRight");
         head.setItemMeta(skullMeta1);
         HeadsSearch.setItemName(head, "Next");
@@ -88,8 +88,8 @@ public class HeadsInventoryPage implements Listener {
     }
 
     public void setDownArrow() {
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta1.setOwner("MHF_ArrowDown");
         head.setItemMeta(skullMeta1);
         HeadsSearch.setItemName(head, "Close");
