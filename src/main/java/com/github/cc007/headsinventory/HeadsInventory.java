@@ -25,6 +25,8 @@ package com.github.cc007.headsinventory;
 
 import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.commands.HeadsInventoryTabCompleter;
+import com.github.cc007.headsinventory.locale.Translator;
+import com.github.cc007.headsplugin.HeadsPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +34,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import net.milkbowl.vault.permission.Permission;
+import org.apache.commons.lang.LocaleUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -45,6 +48,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Rik Schaaf aka CC007 (http://coolcat007.nl/)
  */
 public class HeadsInventory extends JavaPlugin {
+    
+    private static Translator translator = null;
 
     private Plugin vault = null;
     private Permission permission = null;
@@ -227,20 +232,46 @@ public class HeadsInventory extends JavaPlugin {
     }
 
     public static String getHelpMessage() {
+        Translator t = getTranslator();
         return ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Heads Help" + ChatColor.YELLOW + " ---- \n"
-                + ChatColor.GOLD + "/headsinv category <name>" + ChatColor.RESET + ":\n Display heads from a category.\n"
-                + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ":\n Displays all heads from categories.\n"
-                + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ":\n Displays all categories.\n"
-                + ChatColor.GOLD + "/headsinv search <keyword>" + ChatColor.RESET + ":\n Display heads from keyword.\n"
-                + ChatColor.GOLD + "/headsinv fsearch <keyword>" + ChatColor.RESET + ":\n Display heads from keyword from the FreshCoal database.\n"
-                + ChatColor.GOLD + "/headsinv msearch <keyword>" + ChatColor.RESET + ":\n Display heads from keyword from the MineSkin database.\n"
-                + ChatColor.GOLD + "/headsinv mhsearch <keyword>" + ChatColor.RESET + ":\n Display heads from keyword from the Minecraft-heads database.\n"
-                + ChatColor.GOLD + "/headsinv getfirst <keyword>" + ChatColor.RESET + ":\n First head from keyword.\n"
-                + ChatColor.GOLD + "/headsinv fgetfirst <keyword>" + ChatColor.RESET + ":\n First head from keyword from the FreshCoal database.\n"
-                + ChatColor.GOLD + "/headsinv mgetfirst <keyword>" + ChatColor.RESET + ":\n First head from keyword from the MineSkin database.\n"
-                + ChatColor.GOLD + "/playerhead <playername>" + ChatColor.RESET + ": Gives you the head of a player."
-                + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ": Gives you your head. \n"
-                + ChatColor.GOLD + "/addhead <name>" + ChatColor.RESET + ": Adds your current head to the database with the given name";
+                + ChatColor.GOLD + "/headsinv category <" + t.getText("name") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-category-name") + "\n"
+                + ChatColor.GOLD + "/headsinv category all" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-category-all") + "\n"
+                + ChatColor.GOLD + "/headsinv cat" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-cat") + "\n"
+                + ChatColor.GOLD + "/headsinv search <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-search") + "\n"
+                + ChatColor.GOLD + "/headsinv fsearch <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-fsearch") + "\n"
+                + ChatColor.GOLD + "/headsinv msearch <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-msearch") + "\n"
+                + ChatColor.GOLD + "/headsinv mhsearch <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-mhsearch") + "\n"
+                + ChatColor.GOLD + "/headsinv getfirst <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-getfirst") + "\n"
+                + ChatColor.GOLD + "/headsinv fgetfirst <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-fgetfirst") + "\n"
+                + ChatColor.GOLD + "/headsinv mgetfirst <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-mgetfirst") + "\n"
+                + ChatColor.GOLD + "/headsinv mhgetfirst <" + t.getText("keyword") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-headsinv-mhgetfirst") + "\n"
+                + ChatColor.GOLD + "/playerhead <" + t.getText("playername") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-playerhead-playername") + "\n"
+                + ChatColor.GOLD + "/myhead" + ChatColor.RESET + ":\n " + t.getText("cmd-myhead") + " \n"
+                + ChatColor.GOLD + "/addhead <" + t.getText("name") + ">" + ChatColor.RESET + ":\n " + t.getText("cmd-addhead-name") + "\n";
     }
 
+    public static Translator getTranslator() {
+        if(translator == null) {
+            String bundleName = "Translations";
+            translator = new Translator(
+                    bundleName, 
+                    LocaleUtils.toLocale(
+                            HeadsInventory.getPlugin().getConfig().getString("locale", "en_US")
+                    ),
+                    HeadsInventory.getPlugin().getPluginClassLoader()
+            );
+        }
+        return translator;
+    }
+
+    /**
+     * Returns the ClassLoader which holds this plugin
+     *
+     * @return ClassLoader holding this plugin
+     */
+    public ClassLoader getPluginClassLoader() {
+        return getClassLoader();
+    }
+    
+    
 }
