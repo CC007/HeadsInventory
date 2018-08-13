@@ -171,7 +171,8 @@ public class HeadsInventoryCommand implements CommandExecutor {
                     sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-empty"));
                     return;
                 } catch (AuthenticationException ex) {
-                    //legacy exception, ignore it.
+                    //legacy exception
+                    plugin.getLogger().log(Level.SEVERE, null, ex);
                 }
                 if (sender instanceof Player) {
                     sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("info-updateheads-updating-complete"));
@@ -183,7 +184,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return true;
         }
 
-        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-one-unknowncategory") + ": ");
+        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-unknowncategory") + ": ");
         Set<String> categoryNames = HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("predefinedcategories").getKeys(false);
         categoryNames.addAll(HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("customcategories").getKeys(false));
         sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GOLD + StringUtils.join(categoryNames, ", "));
@@ -261,9 +262,11 @@ public class HeadsInventoryCommand implements CommandExecutor {
             case "search":
                 //head search with inventory
                 return onSearchCommand(player, args);
+            case "mhsearchfirst":
             case "msearchfirst":
             case "fsearchfirst":
             case "searchfirst":
+            case "mhgetfirst":
             case "mgetfirst":
             case "fgetfirst":
             case "getfirst":

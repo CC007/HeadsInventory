@@ -24,8 +24,8 @@
 package com.github.cc007.headsinventory.search;
 
 import com.github.cc007.headsinventory.HeadsInventory;
-import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.inventory.HeadsInventoryMenu;
+import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsplugin.HeadsPlugin;
 import com.github.cc007.headsplugin.bukkit.HeadCreator;
 import com.github.cc007.headsplugin.exceptions.AuthenticationException;
@@ -42,7 +42,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -61,15 +60,17 @@ import org.bukkit.inventory.meta.SkullMeta;
 public class HeadsSearch {
 
     public static void myHead(Player player) {
+        Translator t = HeadsInventory.getTranslator();
         ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
         SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta.setOwner(player.getName());
         head.setItemMeta(skullMeta);
         putHeadInInventory(head, player);
-        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "The head is placed in your inventory.");
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("search-info-headgiven"));
     }
 
     public static void playerHead(Player player, String[] otherPlayers) {
+        Translator t = HeadsInventory.getTranslator();
         for (String otherPlayerName : otherPlayers) {
             ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
             SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
@@ -78,10 +79,11 @@ public class HeadsSearch {
             head.setItemMeta(skullMeta);
             putHeadInInventory(head, player);
         }
-        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "The heads are placed in your inventory.");
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true)+ ChatColor.GREEN + t.getText("search-info-headgiven"));
     }
 
     public static void saveHead(Player player, String headName) {
+        Translator t = HeadsInventory.getTranslator();
         Head newHead = null;
         try {
             HeadsUtils hu = HeadsUtils.getInstance();
@@ -90,175 +92,144 @@ public class HeadsSearch {
             hu.setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
         } catch (SocketTimeoutException ex) {
             Bukkit.getLogger().log(Level.SEVERE, ex.getMessage());
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Could not connect to heads database. Please try again later.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-sockettimeout"));
             return;
         } catch (MalformedURLException ex) {
             // prob no heads found
-            Bukkit.getLogger().log(Level.WARNING, "Malformed url exception", ex);
+            Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-malformedurl"), ex);
         } catch (UnknownHostException ex) {
-            Bukkit.getLogger().log(Level.WARNING, "The website returns a non-JSON format. Assume no results were found.", ex);
+            Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-unknownhost"), ex);
         } catch (IOException ex) {
             Bukkit.getLogger().log(Level.SEVERE, null, ex);
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "An unknown error occurred. Please contact an admin.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-io"));
             return;
         } catch (AuthenticationException ex) {
-            HeadsInventory.getPlugin().getLogger().warning(ex.getMessage());
-            switch (HeadsPlugin.getHeadsPlugin().getAccessMode()) {
-                case LITE:
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Adding heads to the database is not part of the lite version of this plugin.");
-                    break;
-                case EXPIRED:
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The trial for the plugin expired. Adding heads to the database is only part of the full or trial version of the plugin.");
-                    break;
-                case NONE:
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The plugin has not been properly configured. Please contact the server owner");
-                    break;
-            }
+            //legacy exception
+            Bukkit.getLogger().log(Level.SEVERE, null, ex);
             return;
         }
         if (newHead == null) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Unable to add the new head to the database.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-error-addhead-failure"));
             return;
         }
         ItemStack newHeadStack = HeadCreator.getItemStack(newHead);
         putHeadInInventory(newHeadStack, player);
-        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "The head added to the database and is placed in your inventory.");
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("search-error-addhead-success"));
     }
 
     public static void search(final Player player, final String searchString, final String searchDatabase) {
-        Thread t = new Thread() {
-
-            @Override
-            public void run() {
-                List<ItemStack> heads = null;
-                try {
-                    switch (searchDatabase) {
-                        case "freshcoal":
-                            HeadsUtils.getInstance().setDatabaseLoader(new FreshCoalLoader());
-                            break;
-                        case "mineskin":
-                            HeadsUtils.getInstance().setDatabaseLoader(new MineSkinLoader());
-                            break;
-                        case "minecraftheads":
-                            HeadsUtils.getInstance().setDatabaseLoader(new MinecraftHeadsLoader(player));
-                            break;
-                        default:
-                            HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
-                    }
-                    heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getHeads(searchString));
-                    HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
-                } catch (SocketTimeoutException ex) {
-                    Bukkit.getLogger().log(Level.SEVERE, ex.getMessage());
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Could not connect to heads database. Please try again later.");
-                    return;
-                } catch (MalformedURLException ex) {
-                    // prob no heads found
-                    Bukkit.getLogger().log(Level.WARNING, "Malformed url exception, probably caused by there not being any results to a search request", ex);
-                } catch (UnknownHostException ex) {
-                    Bukkit.getLogger().log(Level.WARNING, "The website returns a non-JSON format. Assume no results were found.", ex);
-                } catch (IOException ex) {
-                    Bukkit.getLogger().log(Level.SEVERE, null, ex);
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "An unknown error occurred. Please contact an admin.");
-                    return;
-                } catch (AuthenticationException ex) {
-                    HeadsInventory.getPlugin().getLogger().warning(ex.getMessage());
-                    switch (HeadsPlugin.getHeadsPlugin().getAccessMode()) {
-                        case LITE:
-                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Searching through the user collection is not part of the lite version of this plugin.");
-                            break;
-                        case EXPIRED:
-                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The trial for the plugin expired. Searching through the user collection is only part of the full or trial version of the plugin.");
-                            break;
-                        case NONE:
-                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The plugin has not been properly configured. Please contact the server owner");
-                            break;
-                    }
-                    return;
+        Translator t = HeadsInventory.getTranslator();
+        Thread thread = new Thread(() -> {
+            List<ItemStack> heads = null;
+            try {
+                switch (searchDatabase) {
+                    case "freshcoal":
+                        HeadsUtils.getInstance().setDatabaseLoader(new FreshCoalLoader());
+                        break;
+                    case "mineskin":
+                        HeadsUtils.getInstance().setDatabaseLoader(new MineSkinLoader());
+                        break;
+                    case "minecraftheads":
+                        HeadsUtils.getInstance().setDatabaseLoader(new MinecraftHeadsLoader(player));
+                        break;
+                    default:
+                        HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
                 }
-                if (heads == null || heads.isEmpty()) {
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No heads found.");
-                    return;
-                }
-
-                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Choose a head from the inventory...");
-                showInventory(searchString, player, heads);
+                heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getHeads(searchString));
+                HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
+            } catch (SocketTimeoutException ex) {
+                Bukkit.getLogger().log(Level.SEVERE, ex.getMessage());
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-sockettimeout"));
+                return;
+            } catch (MalformedURLException ex) {
+                // prob no heads found
+                Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-malformedurl"), ex);
+            } catch (UnknownHostException ex) {
+                Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-unknownhost"), ex);
+            } catch (IOException ex) {
+                Bukkit.getLogger().log(Level.SEVERE, null, ex);
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-io"));
+                return;
+            } catch (AuthenticationException ex) {
+                //legacy exception
+                Bukkit.getLogger().log(Level.SEVERE, null, ex);
+                return;
+            }
+            if (heads == null || heads.isEmpty()) {
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GOLD + t.getText("search-msg-search-noheads"));
+                return;
             }
 
-        };
-        t.start();
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("search-msg-search-choose"));
+            showInventory(searchString, player, heads);
+        });
+        thread.start();
     }
 
     public static void searchFirst(final Player player, final String searchString, final String searchDatabase) {
-        Thread t = new Thread() {
-
-            @Override
-            public void run() {
-                ItemStack head = null;
-                try {
-                    switch (searchDatabase) {
-                        case "freshcoal":
-                            HeadsUtils.getInstance().setDatabaseLoader(new FreshCoalLoader());
-                            break;
-                        case "mineskin":
-                            HeadsUtils.getInstance().setDatabaseLoader(new MineSkinLoader());
-                            break;
-                        default:
-                            HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
-                    }
-                    head = HeadCreator.getItemStack(HeadsUtils.getInstance().getHead(searchString));
-                    HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
-                } catch (SocketTimeoutException ex) {
-                    Bukkit.getLogger().log(Level.SEVERE, null, ex);
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Could not connect to heads database. Please try again later.");
-                    return;
-                } catch (UnknownHostException ex) {
-                    Bukkit.getLogger().log(Level.WARNING, "The website returns a non-JSON format. Assume no results were found.");
-                } catch (IOException ex) {
-                    Bukkit.getLogger().log(Level.SEVERE, null, ex);
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "An unknown error occurred. Please contact an admin.");
-                    return;
-                } catch (AuthenticationException ex) {
-                    HeadsInventory.getPlugin().getLogger().warning(ex.getMessage());
-                    switch (HeadsPlugin.getHeadsPlugin().getAccessMode()) {
-                        case LITE:
-                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Searching through the user collection is not part of the lite version of this plugin.");
-                            break;
-                        case EXPIRED:
-                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The trial for the plugin expired. Searching through the user collection is only part of the full or trial version of the plugin.");
-                            break;
-                        case NONE:
-                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The plugin has not been properly configured. Please contact the server owner");
-                            break;
-                    }
-                    return;
+        Translator t = HeadsInventory.getTranslator();
+        Thread thread = new Thread(() -> {
+            ItemStack head = null;
+            try {
+                switch (searchDatabase) {
+                    case "freshcoal":
+                        HeadsUtils.getInstance().setDatabaseLoader(new FreshCoalLoader());
+                        break;
+                    case "mineskin":
+                        HeadsUtils.getInstance().setDatabaseLoader(new MineSkinLoader());
+                        break;
+                    case "minecraftheads":
+                        HeadsUtils.getInstance().setDatabaseLoader(new MinecraftHeadsLoader(player));
+                        break;
+                    default:
+                        HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
                 }
-                if (head == null) {
-                    player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No heads found.");
-                    return;
-                }
-                putHeadInInventory(head, player);
-                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "The head is placed in your inventory.");
+                head = HeadCreator.getItemStack(HeadsUtils.getInstance().getHead(searchString));
+                HeadsUtils.getInstance().setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
+            } catch (SocketTimeoutException ex) {
+                Bukkit.getLogger().log(Level.SEVERE, ex.getMessage());
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-sockettimeout"));
+                return;
+            } catch (MalformedURLException ex) {
+                // prob no heads found
+                Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-malformedurl"), ex);
+            } catch (UnknownHostException ex) {
+                Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-unknownhost"), ex);
+            } catch (IOException ex) {
+                Bukkit.getLogger().log(Level.SEVERE, null, ex);
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-io"));
+                return;
+            } catch (AuthenticationException ex) {
+                //legacy exception
+                Bukkit.getLogger().log(Level.SEVERE, null, ex);
+                return;
             }
-
-        };
-        t.start();
+            if (head == null) {
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GOLD  + t.getText("search-msg-search-noheads"));
+                return;
+            }
+            putHeadInInventory(head, player);
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("search-info-headgiven"));
+        });
+        thread.start();
     }
 
     public static boolean searchAllCategories(Player player) {
+        Translator t = HeadsInventory.getTranslator();
         List<ItemStack> heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getAllCategoryHeads());
         if (heads == null || heads.isEmpty()) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No heads found.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-search-noheads"));
             return false;
         }
 
-        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Choose a head from the inventory...");
-        showInventory("All categories", player, heads);
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("search-msg-search-choose"));
+        showInventory(t.getText("search-gui-search-allcategories"), player, heads);
         return true;
 
     }
 
     public static boolean searchCategory(Player player, String categoryName) {
-
+        Translator t = HeadsInventory.getTranslator();
         // check if given category name exists
         boolean flag = false;
         for (HeadsCategory category : HeadsUtils.getInstance().getCategories().getList()) {
@@ -269,29 +240,26 @@ public class HeadsSearch {
         }
 
         if (!flag) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No category found with that name, possible categories: ");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-unknowncategory") + ": ");
             sendCategoriesList(player);
             return false;
         }
 
         List<ItemStack> heads = HeadCreator.getItemStacks(HeadsUtils.getInstance().getCategoryHeads(categoryName));
         if (heads == null || heads.isEmpty()) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No heads found.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-search-noheads"));
             return false;
         }
 
-        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Choose a head from the inventory...");
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("search-msg-search-choose"));
         showInventory(categoryName, player, heads);
         return true;
     }
 
     private static void showInventory(String menuName, Player player, List<ItemStack> heads) {
         final HeadsInventoryMenu menu = new HeadsInventoryMenu(player, menuName, heads);
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), new Runnable() {
-            @Override
-            public void run() {
-                menu.getInventoryPages().get(0).open();
-            }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), () -> {
+            menu.getInventoryPages().get(0).open();
         }, 5);
     }
 

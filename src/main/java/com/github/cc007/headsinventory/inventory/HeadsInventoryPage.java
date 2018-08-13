@@ -25,6 +25,7 @@ package com.github.cc007.headsinventory.inventory;
 
 import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.events.HeadGivenEvent;
+import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,35 +71,39 @@ public class HeadsInventoryPage implements Listener {
     }
 
     public void setLeftArrow() {
+        Translator t = HeadsInventory.getTranslator();
         ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
         SkullMeta skullMeta2 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta2.setOwner("MHF_ArrowLeft");
         head.setItemMeta(skullMeta2);
-        HeadsSearch.setItemName(head, "Previous");
+        HeadsSearch.setItemName(head, t.getText("headsinvpage-gui-previous"));
         items.put(menu.getRowCount() * 9, head);
     }
 
     public void setRightArrow() {
+        Translator t = HeadsInventory.getTranslator();
         ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
         SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta1.setOwner("MHF_ArrowRight");
         head.setItemMeta(skullMeta1);
-        HeadsSearch.setItemName(head, "Next");
+        HeadsSearch.setItemName(head, t.getText("headsinvpage-gui-next"));
         items.put(menu.getRowCount() * 9 + 8, head);
     }
 
     public void setDownArrow() {
+        Translator t = HeadsInventory.getTranslator();
         ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1, (byte) SkullType.PLAYER.ordinal());
         SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.PLAYER_HEAD);
         skullMeta1.setOwner("MHF_ArrowDown");
         head.setItemMeta(skullMeta1);
-        HeadsSearch.setItemName(head, "Close");
+        HeadsSearch.setItemName(head, t.getText("headsinvpage-gui-close"));
         items.put(menu.getRowCount() * 9 + 4, head);
     }
 
     public void open() {
+        Translator t = HeadsInventory.getTranslator();
         if (inventory == null) {
-            inventory = Bukkit.createInventory(menu.getPlayer(), (menu.getRowCount() + 1) * 9, menu.getMenuName() + " page " + pageNr + "/" + menu.getPageCount());
+            inventory = Bukkit.createInventory(menu.getPlayer(), (menu.getRowCount() + 1) * 9, menu.getMenuName() + " " + t.getText("headsinvpage-gui-page") + " " + pageNr + "/" + menu.getPageCount());
             for (Map.Entry<Integer, ItemStack> entrySet : items.entrySet()) {
                 if (entrySet.getValue() != null) {
                     inventory.setItem(entrySet.getKey(), entrySet.getValue());
@@ -111,30 +116,28 @@ public class HeadsInventoryPage implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!event.getInventory().getTitle().equals(menu.getMenuName() + " page " + pageNr + "/" + menu.getPageCount())) {
+        Translator t = HeadsInventory.getTranslator();
+        if (!event.getInventory().getTitle().equals(menu.getMenuName() + " " + t.getText("headsinvpage-gui-page") + " " + pageNr + "/" + menu.getPageCount())) {
             return;
         }
-        Bukkit.getLogger().fine("Menu name correct");
 
         if (menu.getPlayer() != null && !event.getPlayer().equals(menu.getPlayer())) {
             return;
         }
-        Bukkit.getLogger().fine("Player name correct");
 
         HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getInventory().getTitle().equals(menu.getMenuName() + " page " + pageNr + "/" + menu.getPageCount())) {
+        Translator t = HeadsInventory.getTranslator();
+        if (!event.getInventory().getTitle().equals(menu.getMenuName() + " " + t.getText("headsinvpage-gui-page") + " " + pageNr + "/" + menu.getPageCount())) {
             return;
         }
-        Bukkit.getLogger().fine("Menu name correct");
 
         if (menu.getPlayer() != null && !event.getWhoClicked().equals(menu.getPlayer())) {
             return;
         }
-        Bukkit.getLogger().fine("Player name correct");
         event.setCancelled(true);
 
         if (event.getClick() != ClickType.LEFT) {
@@ -148,32 +151,23 @@ public class HeadsInventoryPage implements Listener {
         if (slot / 9 != menu.getRowCount()) {
             menu.getPlayer().getInventory().addItem(items.get(slot));
             Bukkit.getServer().getPluginManager().callEvent(new HeadGivenEvent(menu.getPlayer(), items.get(slot), menu.getPlayer().getWorld(), new Date()));
-            menu.getPlayer().sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Here's the skull");
+            menu.getPlayer().sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("search-info-headgiven"));
             return;
         }
         if (slot == menu.getRowCount() * 9) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), new Runnable() {
-                @Override
-                public void run() {
-                    menu.getInventoryPages().get(pageNr - 2).open();
-                }
+            Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), () -> {
+                menu.getInventoryPages().get(pageNr - 2).open();
             }, 5);
             return;
         }
         if (slot == ((menu.getRowCount() + 1) * 9) - 1) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), new Runnable() {
-                @Override
-                public void run() {
-                    menu.getInventoryPages().get(pageNr).open();
-                }
+            Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), () -> {
+                menu.getInventoryPages().get(pageNr).open();
             }, 5);
         }
         menu.getPlayer().updateInventory();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), new Runnable() {
-            @Override
-            public void run() {
-                menu.getPlayer().closeInventory();
-            }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(Bukkit.getServer().getPluginManager().getPlugin("HeadsInventory"), () -> {
+            menu.getPlayer().closeInventory();
         });
     }
 }
