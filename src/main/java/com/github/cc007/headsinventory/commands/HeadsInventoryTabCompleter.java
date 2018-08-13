@@ -27,6 +27,7 @@ import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsplugin.HeadsPlugin;
 import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -57,13 +58,26 @@ public class HeadsInventoryTabCompleter implements TabCompleter {
             commands.addAll(HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("customcategories").getKeys(false));
             StringUtil.copyPartialMatches(partialCommand, commands, completions);
         }
+        if (command.getName().equalsIgnoreCase("headsinventory") && args.length == 1) {
+            String partialCommand = args[0];
+            List<String> commands = new ArrayList(Arrays.asList(
+                    "cat", "category", "categories",
+                    "search", "fsearch", "msearch", "mhsearch",
+                    "searchfirst", "fsearchfirst", "msearchfirst", "mhsearchfirst",
+                    "getfirst", "fgetfirst", "mgetfirst", "mhgetfirst",
+                    "help", ""
+            ));
+            StringUtil.copyPartialMatches(partialCommand, commands, completions);
+        }
         if (command.getName().equalsIgnoreCase("headsinventory") && args.length == 2) {
-            if (args[0].equalsIgnoreCase("categories") || args[0].equalsIgnoreCase("cat")) {
+            if (args[0].equalsIgnoreCase("categories") || args[0].equalsIgnoreCase("category") || args[0].equalsIgnoreCase("cat")) {
                 String partialCommand = args[1];
                 List<String> commands = new ArrayList<>();
                 for (HeadsCategory category : HeadsPlugin.getHeadsPlugin().getHeadsUtils().getCategories().getList()) {
                     commands.add(category.getCategoryName());
                 }
+                commands.add("all");
+                commands.add("");
                 StringUtil.copyPartialMatches(partialCommand, commands, completions);
             }
         }

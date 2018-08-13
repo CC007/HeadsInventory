@@ -24,12 +24,12 @@
 package com.github.cc007.headsinventory.inventory;
 
 import com.github.cc007.headsinventory.HeadsInventory;
+import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsplugin.bukkit.HeadCreator;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
 import com.github.cc007.headsplugin.utils.heads.Head;
 import com.github.cc007.headsplugin.utils.heads.HeadsCategories;
 import java.util.List;
-import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -57,10 +57,10 @@ public class CategoriesMenu implements Listener {
     }
 
     public void open() {
-
+        Translator t = HeadsInventory.getTranslator();
         if (inventory == null) {
             List rows = (List) HeadsInventory.getPlugin().getConfig().get("menuContents");
-            inventory = Bukkit.createInventory(player, rows.size() * 9, ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + "Categories:");
+            inventory = Bukkit.createInventory(player, rows.size() * 9, ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + t.getText("categoriesmenu-gui-categoriestitle") + ":");
 
             HeadsCategories categories = HeadsUtils.getInstance().getCategories();
             for (int i = 0; i < rows.size(); i++) {
@@ -69,8 +69,8 @@ public class CategoriesMenu implements Listener {
                     int id = cols.get(j).get(0);
                     if (id != 0) {
                         if (categories.getCategory(id) == null) {
-                            player.sendMessage("This command isn't available at the moment.");
-                            Bukkit.getLogger().warning(HeadsInventory.pluginChatPrefix(false) + "Player tried to open the category menu, but not all categories were loaded");
+                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("categoriesmenu-error-categorynotloaded"));
+                            HeadsInventory.getPlugin().getLogger().warning(t.getText("categoriesmenu-warning-categorynotloaded"));
                             return;
                         }
                         Head showHead = categories.getCategory(id).getList().get(cols.get(j).get(1));
@@ -95,30 +95,28 @@ public class CategoriesMenu implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!event.getInventory().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + "Categories:")) {
+        Translator t = HeadsInventory.getTranslator();
+        if (!event.getInventory().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + t.getText("categoriesmenu-gui-categoriestitle") + ":")) {
             return;
         }
-        Bukkit.getLogger().fine("Menu name correct");
 
         if (player != null && !event.getPlayer().equals(player)) {
             return;
         }
-        Bukkit.getLogger().fine("Player name correct");
 
         HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getInventory().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + "Categories:")) {
+        Translator t = HeadsInventory.getTranslator();
+        if (!event.getInventory().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + t.getText("categoriesmenu-gui-categoriestitle") + ":")) {
             return;
         }
-        Bukkit.getLogger().fine("Menu name correct");
 
         if (player != null && !event.getWhoClicked().equals(player)) {
             return;
         }
-        Bukkit.getLogger().fine("Player name correct");
         event.setCancelled(true);
 
         if (event.getClick() != ClickType.LEFT) {
