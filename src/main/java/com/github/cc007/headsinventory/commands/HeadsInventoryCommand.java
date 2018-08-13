@@ -25,6 +25,7 @@ package com.github.cc007.headsinventory.commands;
 
 import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.inventory.CategoriesMenu;
+import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import com.github.cc007.headsplugin.HeadsPlugin;
 import com.github.cc007.headsplugin.exceptions.AuthenticationException;
@@ -35,9 +36,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -59,7 +58,8 @@ public class HeadsInventoryCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
-
+        Translator t = HeadsInventory.getTranslator();
+        
         // update heads
         if (command.getName().equalsIgnoreCase("updateheads")) {
             return onUpdateHeadsCommand(sender, args);
@@ -67,7 +67,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
 
         // from here on only player commands
         if (!(sender instanceof Player)) {
-            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Only players can perform this command");
+            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-player-command"));
             return false;
         }
         Player player = (Player) sender;
@@ -75,6 +75,8 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
 
     private boolean onPlayerCommand(Player player, Command command, String commandLabel, String[] args) {
+        Translator t = HeadsInventory.getTranslator();
+        
         switch (command.getName().toLowerCase()) {
             case "myhead":
                 return onMyHeadCommand(player);
@@ -87,111 +89,101 @@ public class HeadsInventoryCommand implements CommandExecutor {
             case "headsinventory":
                 return onHeadsInventoryCommand(player, args);
             default:
-                plugin.getLogger().log(Level.WARNING, "Unknown command send: {0}", command.getName());
-                plugin.getLogger().log(Level.WARNING, "Used alias: {0}", commandLabel);
-                return false;
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-incorrect-usage"));
+                player.sendMessage(HeadsInventory.getHelpMessage());
+                return true;
         }
     }
 
     private boolean onUpdateHeadsCommand(final CommandSender sender, final String[] args) {
+        final Translator t = HeadsInventory.getTranslator();
+        
         if (!sender.hasPermission("headsinv.update")) {
-            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission to update the catagorized heads.");
+            sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("error-updateheads-nopermission"));
             return false;
         }
 
         if (args.length < 1) {
             if (sender instanceof Player) {
-                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating all categories...");
+                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("info-updateheads-updating-all"));
             } else {
-                sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + "Updating all categories...");
+                sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + t.getText("info-updateheads-updating-all"));
             }
-            Thread t = new Thread() {
-
-                @Override
-                public void run() {
+            Thread thread = new Thread(()-> {
+                try {
+                    HeadsUtils.getInstance().loadCategories();
+                } catch (SocketTimeoutException ex) {
                     try {
                         HeadsUtils.getInstance().loadCategories();
-                    } catch (SocketTimeoutException ex) {
-                        try {
-                            HeadsUtils.getInstance().loadCategories();
-                        } catch (SocketTimeoutException ex2) {
-                            plugin.getLogger().severe("The server did not respond. Please check if the heads website is online.");
-                            plugin.getLogger().log(Level.SEVERE, null, ex2);
-                        } catch (MalformedURLException ex2) {
-                            plugin.getLogger().severe("The url is malformed. Please check the config file");
-                            plugin.getLogger().log(Level.SEVERE, null, ex2);
-                        } catch (IOException ex2) {
-                            plugin.getLogger().severe("An unknown exception has occurred. Please check if the heads website is online.");
-                            plugin.getLogger().log(Level.SEVERE, null, ex2);
-                        }
-                    } catch (MalformedURLException ex) {
-                        plugin.getLogger().severe("The url is malformed. Please check the config file");
-                        plugin.getLogger().log(Level.SEVERE, null, ex);
-                    } catch (IOException ex) {
-                        plugin.getLogger().severe("An unknown exception has occurred. Please check if the heads website is online.");
-                        plugin.getLogger().log(Level.SEVERE, null, ex);
+                    } catch (SocketTimeoutException ex2) {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-sockettimeout"));
+                        plugin.getLogger().severe(t.getText("error-updateheads-updating-sockettimeout"));
+                        plugin.getLogger().log(Level.SEVERE, null, ex2);
+                    } catch (MalformedURLException ex2) {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-malformedurl"));
+                        plugin.getLogger().severe(t.getText("error-updateheads-updating-malformedurl"));
+                        plugin.getLogger().log(Level.SEVERE, null, ex2);
+                    } catch (IOException ex2) {
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-io"));
+                        plugin.getLogger().severe(t.getText("error-updateheads-updating-io"));
+                        plugin.getLogger().log(Level.SEVERE, null, ex2);
                     }
-                    if (sender instanceof Player) {
-                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
-                    } else {
-                        sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + "Update complete.");
-                    }
+                } catch (MalformedURLException ex) {
+                    plugin.getLogger().severe(t.getText("error-updateheads-updating-all-malformedurl"));
+                    plugin.getLogger().log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    plugin.getLogger().severe(t.getText("error-updateheads-updating-all-io"));
+                    plugin.getLogger().log(Level.SEVERE, null, ex);
                 }
-
-            };
-            t.start();
+                if (sender instanceof Player) {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("info-updateheads-updating-complete"));
+                } else {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + t.getText("info-updateheads-updating-complete"));
+                }
+            });
+            thread.start();
             return true;
         }
 
         if (HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("predefinedcategories." + args[0]) || HeadsPlugin.getHeadsPlugin().getCategoriesConfig().isInt("customcategories." + args[0] + ".id")) {
             if (sender instanceof Player) {
-                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Updating category: " + args[0] + "...");
+                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("info-updateheads-updating-one") + ": " + args[0] + "...");
             }
-            Thread t = new Thread() {
-
-                @Override
-                public void run() {
-
-                    try {
-                        HeadsUtils.getInstance().loadCategory(args[0]);
-                    } catch (SocketTimeoutException ex) {
-                        plugin.getLogger().log(Level.SEVERE, null, ex);
-                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The heads database didn't respond in time.");
-                        return;
-                    } catch (IOException ex) {
-                        plugin.getLogger().log(Level.SEVERE, null, ex);
-                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "An unknown error occurred while reloading a category! Please contact an admin.");
-                        return;
-                    } catch (NullPointerException ex) {
-                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Category is empty!");
-                        return;
-                    } catch (AuthenticationException ex) {
-                        plugin.getLogger().warning(ex.getMessage());
-                        switch (HeadsPlugin.getHeadsPlugin().getAccessMode()) {
-                            case LITE:
-                                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The category that was specified is not part of the lite version of this plugin.");
-                                break;
-                            case EXPIRED:
-                                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The trial for the plugin expired. The category that you tried to load is part of the full or trial version of the plugin.");
-                                break;
-                            case NONE:
-                                sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The plugin has not been properly configured. Please contact the server owner");
-                                break;
-                        }
-                    }
-                    if (sender instanceof Player) {
-                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + "Update complete.");
-                    } else {
-                        sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + "Update complete.");
-                    }
+            Thread thread = new Thread(()-> {
+                try {
+                    HeadsUtils.getInstance().loadCategory(args[0]);
+                } catch (SocketTimeoutException ex) {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-sockettimeout"));
+                    plugin.getLogger().severe(t.getText("error-updateheads-updating-sockettimeout"));
+                    plugin.getLogger().log(Level.SEVERE, null, ex);
+                    return;
+                } catch (MalformedURLException ex) {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-malformedurl"));
+                    plugin.getLogger().severe(t.getText("error-updateheads-updating-malformedurl"));
+                    plugin.getLogger().log(Level.SEVERE, null, ex);
+                    return;
+                } catch (IOException ex) {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-io"));
+                    plugin.getLogger().severe(t.getText("error-updateheads-updating-io"));
+                    plugin.getLogger().log(Level.SEVERE, null, ex);
+                    return;
+                } catch (NullPointerException ex) {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-empty"));
+                    return;
+                } catch (AuthenticationException ex) {
+                    //legacy exception, ignore it.
                 }
-
-            };
-            t.start();
+                if (sender instanceof Player) {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("info-updateheads-updating-complete"));
+                } else {
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(false) + t.getText("info-updateheads-updating-complete"));
+                }
+            });
+            thread.start();
             return true;
         }
 
-        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "No category found with that name, possible categories: ");
+        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-one-unknowncategory") + ": ");
         Set<String> categoryNames = HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("predefinedcategories").getKeys(false);
         categoryNames.addAll(HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("customcategories").getKeys(false));
         sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GOLD + StringUtils.join(categoryNames, ", "));
@@ -199,8 +191,9 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
 
     private boolean onMyHeadCommand(Player player) {
+        Translator t = HeadsInventory.getTranslator();
         if (!player.hasPermission("headsinv.myhead")) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have the permission to spawn in your own head");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-myhead-nopermission"));
             return false;
         }
         HeadsSearch.myHead(player);
@@ -208,12 +201,13 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
 
     private boolean onPlayerHeadCommand(Player player, String[] args) {
+        Translator t = HeadsInventory.getTranslator();
         if (!player.hasPermission("headsinv.playerhead")) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have the permission to spawn in someone elses head");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-playerhead-nopermission"));
             return false;
         }
         if (args.length == 0) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You didn't specify a username");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-playerhead-noplayername"));
             return false;
         }
         HeadsSearch.playerHead(player, args);
@@ -226,13 +220,14 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
     
     private boolean onAddHeadCommand(Player player, String args[]) {
+        Translator t = HeadsInventory.getTranslator();
         if (!player.hasPermission("headsinv.add")) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission add heads to the database.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-addhead-nopermission"));
             return false;
         }
         
         if (args.length < 1) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify the name for the new head.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-addhead-noheadname"));
             return false;
         }
         //TODO check name for edge cases
@@ -242,8 +237,10 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
 
     private boolean onHeadsInventoryCommand(Player player, String args[]) {
+        Translator t = HeadsInventory.getTranslator();
+        
         if (!player.hasPermission("headsinv.inventory")) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "You don't have permission to look up custom heads.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-nopermission"));
             return false;
         }
 
@@ -272,14 +269,18 @@ public class HeadsInventoryCommand implements CommandExecutor {
             case "getfirst":
                 //return first head from search
                 return onSearchFirstCommand(player, args);
+            case "help":
+                player.sendMessage(HeadsInventory.getHelpMessage());
+                return true;
             default:
-                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "Incorrect usage.");
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-incorrect-usage"));
                 player.sendMessage(HeadsInventory.getHelpMessage());
                 return true;
         }
     }
 
     private boolean onCategoriesCommand(Player player, String[] args) {
+        Translator t = HeadsInventory.getTranslator();
         if (args.length == 1) {
             /*//return the category names
             HeadsSearch.sendCategoriesList(player);*/
@@ -291,7 +292,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
         }
 
         if (args.length > 2) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + "Please provide only one category name.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-categories-multiplecategories"));
             return false;
         }
 
@@ -304,12 +305,13 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
 
     private boolean onSearchCommand(Player player, String[] args) {
+        Translator t = HeadsInventory.getTranslator();
         if (args.length < 2) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify a head.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-search-nosearchterm"));
             return false;
         }
         if (args[1].length() < 3) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The keyword needs start with at least 3 characters.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-search-shortsearchterm"));
             return false;
         }
 
@@ -321,12 +323,13 @@ public class HeadsInventoryCommand implements CommandExecutor {
     }
 
     private boolean onSearchFirstCommand(Player player, String[] args) {
+        Translator t = HeadsInventory.getTranslator();
         if (args.length < 2) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "You need to specify a head.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-search-nosearchterm"));
             return false;
         }
         if (args[1].length() < 3) {
-            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + "The keyword needs start with at least 3 characters.");
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-search-shortsearchterm"));
             return false;
         }
 
