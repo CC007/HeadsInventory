@@ -30,12 +30,14 @@ import com.github.cc007.headsplugin.HeadsPlugin;
 import com.github.cc007.headsplugin.bukkit.HeadCreator;
 import com.github.cc007.headsplugin.exceptions.AuthenticationException;
 import com.github.cc007.headsplugin.utils.HeadsUtils;
+import com.github.cc007.headsplugin.utils.MinecraftVersion;
 import com.github.cc007.headsplugin.utils.heads.Head;
 import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
 import com.github.cc007.headsplugin.utils.loader.FreshCoalLoader;
 import com.github.cc007.headsplugin.utils.loader.MineSkinLoader;
 import com.github.cc007.headsplugin.utils.loader.MinecraftHeadsLoader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -58,11 +60,28 @@ import org.bukkit.inventory.meta.SkullMeta;
  * @author Rik Schaaf aka CC007 (http://coolcat007.nl/)
  */
 public class HeadsSearch {
-
+    private static Material skull;
+    static {
+        MinecraftVersion version = new MinecraftVersion();
+        String skullName;
+        if(version.getMinor() > 12){
+            skullName = "PLAYER_HEAD";
+        } else {
+            skullName = "SKULL_ITEM";
+        }
+        try{
+            Class<?> obMaterialClass = Class.forName("org.bukkit.Material");
+            Field skull = obMaterialClass.getDeclaredField(skullName);
+            HeadsSearch.skull = (Material) skull.get(null);
+        } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            HeadsSearch.skull = null;
+        }
+    }
+    
     public static void myHead(Player player) {
         Translator t = HeadsInventory.getTranslator();
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(skull, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(skull);
         skullMeta.setOwner(player.getName());
         head.setItemMeta(skullMeta);
         putHeadInInventory(head, player);
@@ -72,8 +91,8 @@ public class HeadsSearch {
     public static void playerHead(Player player, String[] otherPlayers) {
         Translator t = HeadsInventory.getTranslator();
         for (String otherPlayerName : otherPlayers) {
-            ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-            SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+            ItemStack head = new ItemStack(skull, 1, (byte) SkullType.PLAYER.ordinal());
+            SkullMeta skullMeta = (SkullMeta) Bukkit.getItemFactory().getItemMeta(skull);
             //TODO check if player exists: Player otherPlayer = getPlayerByName(otherPlayerName);
             skullMeta.setOwner(otherPlayerName);
             head.setItemMeta(skullMeta);

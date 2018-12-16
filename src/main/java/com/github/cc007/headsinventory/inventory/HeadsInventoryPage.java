@@ -27,9 +27,14 @@ import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.events.HeadGivenEvent;
 import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsinventory.search.HeadsSearch;
+import com.github.cc007.headsplugin.utils.HeadsUtils;
+import com.github.cc007.headsplugin.utils.MinecraftVersion;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -55,11 +60,26 @@ public class HeadsInventoryPage implements Listener {
     private final HeadsInventoryMenu menu;
     private final int pageNr;
     private final Map<Integer, ItemStack> items;
+    private Material skull;
 
     public HeadsInventoryPage(HeadsInventoryMenu menu, int pageNr) {
         this.menu = menu;
         this.pageNr = pageNr;
         this.items = new HashMap<>();
+        MinecraftVersion version = new MinecraftVersion();
+        String skullName;
+        if(version.getMinor() > 12){
+            skullName = "PLAYER_HEAD";
+        } else {
+            skullName = "SKULL_ITEM";
+        }
+        try{
+            Class<?> obMaterialClass = Class.forName("org.bukkit.Material");
+            Field skull = obMaterialClass.getDeclaredField(skullName);
+            this.skull = (Material) skull.get(null);
+        } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            this.skull = null;
+        }
     }
 
     public final void registerEvents() {
@@ -72,8 +92,8 @@ public class HeadsInventoryPage implements Listener {
 
     public void setLeftArrow() {
         Translator t = HeadsInventory.getTranslator();
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta2 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(skull, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta2 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(skull);
         skullMeta2.setOwner("MHF_ArrowLeft");
         head.setItemMeta(skullMeta2);
         HeadsSearch.setItemName(head, t.getText("headsinvpage-gui-previous"));
@@ -82,8 +102,8 @@ public class HeadsInventoryPage implements Listener {
 
     public void setRightArrow() {
         Translator t = HeadsInventory.getTranslator();
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(skull, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(skull);
         skullMeta1.setOwner("MHF_ArrowRight");
         head.setItemMeta(skullMeta1);
         HeadsSearch.setItemName(head, t.getText("headsinvpage-gui-next"));
@@ -92,8 +112,8 @@ public class HeadsInventoryPage implements Listener {
 
     public void setDownArrow() {
         Translator t = HeadsInventory.getTranslator();
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) SkullType.PLAYER.ordinal());
-        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(Material.SKULL_ITEM);
+        ItemStack head = new ItemStack(skull, 1, (byte) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta1 = (SkullMeta) Bukkit.getItemFactory().getItemMeta(skull);
         skullMeta1.setOwner("MHF_ArrowDown");
         head.setItemMeta(skullMeta1);
         HeadsSearch.setItemName(head, t.getText("headsinvpage-gui-close"));
