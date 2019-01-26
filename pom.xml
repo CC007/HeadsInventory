@@ -189,7 +189,7 @@
                                     <exclude>javax.persistence:persistence-api</exclude>
                                     <exclude>mysql:mysql-connector-java</exclude>
                                     <exclude>net.milkbowl.vault:Vault</exclude>
-                                    <exclude>com.github.cc007:HeadsPlugin</exclude>
+                                    <exclude>com.github.cc007:HeadsPluginAPI</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
