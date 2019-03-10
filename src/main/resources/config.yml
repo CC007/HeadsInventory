@@ -1,14 +1,19 @@
+# used for new version detection
+version: ${project.version}
+
 # This variable contains the categories that will be displayed in the categories UI
 # the first indented hyphen signifies a row, the second indented hyphen is a column within that row. 
 # The number pair is the category id to link to and the head index in that category to use as category image
 # Category id 0 means that no category will be displayed there
 # The default category UI will look like this:
 #
-#   +------+------+-------+------+--------+----------+-------+------+------+
-#   |      | food |devices| misc |alphabet| interior | color |blocks|      |
-#   +------+------+-------+------+--------+----------+-------+------+------+
-#   |      |      | mobs  | games|        |characters|pokemon|      |      | 
-#   +------+------+-------+------+--------+----------+-------+------+------+
+#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
+#   |     food     | alphabet  | blocks  |  interior   |characters |   mobs    |      misc      |pokemon|color |
+#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
+#   |mh-food-drinks|mh-alphabet|mh-blocks|mh-decoration| mh-humans |mh-animals |mh-miscellaneous| Games |      | 
+#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
+#   |              |           |         |   devices   |mh-humanoid|mh-monsters|                |       |      | 
+#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
 # 
 # You can just as easily add custom categories in here. Also note that you don't have
 # to add all categories in this overview. The categories that are not in the overview
@@ -16,23 +21,33 @@
 # the amount of rows can vary, but the amount of columns always needs to be 9
 menuContents: 
     -
-        - [0,0]
         - [1,19]
-        - [2,0]
-        - [3,4]
-        - [4,8]
-        - [5,18]
-        - [6,0]
-        - [7,2]
+        - [2,8]
+        - [4,2]
+        - [3,18]
+        - [5,31]
+        - [6,9]
+        - [7,4]
+        - [11,28]
+        - [9,0]
+    -
+        - [21,0]
+        - [12,33]
+        - [14,3]
+        - [13,52]
+        - [15,16]
+        - [17,5]
+        - [19,22]
+        - [10,26]
         - [0,0]
     -
         - [0,0]
         - [0,0]
-        - [9,9]
-        - [8,29]
         - [0,0]
-        - [10,31]
-        - [11,28]
+        - [8,0]
+        - [16,13]
+        - [18,133]
+        - [0,0]
         - [0,0]
         - [0,0]
 

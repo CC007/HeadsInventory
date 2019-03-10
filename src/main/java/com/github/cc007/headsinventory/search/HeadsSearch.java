@@ -169,6 +169,10 @@ public class HeadsSearch {
                 Bukkit.getLogger().log(Level.SEVERE, null, ex);
                 player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-io"));
                 return;
+            } catch (UnsupportedOperationException ex) {
+                Bukkit.getLogger().log(Level.WARNING, null, ex);
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-unsupported"));
+                return;
             } catch (AuthenticationException ex) {
                 //legacy exception
                 Bukkit.getLogger().log(Level.SEVERE, null, ex);
@@ -217,6 +221,10 @@ public class HeadsSearch {
             } catch (IOException ex) {
                 Bukkit.getLogger().log(Level.SEVERE, null, ex);
                 player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-io"));
+                return;
+            } catch (UnsupportedOperationException ex) {
+                Bukkit.getLogger().log(Level.WARNING, null, ex);
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-unsupported"));
                 return;
             } catch (AuthenticationException ex) {
                 //legacy exception

@@ -223,11 +223,20 @@ public class HeadsInventory extends JavaPlugin {
      */
     @Override
     public void saveDefaultConfig() {
+        String version = getConfig().getString("version", null);
         if (configFile == null) {
             configFile = new File(getDataFolder(), "config.yml");
         }
         if (!configFile.exists()) {
             saveResource("config.yml", false);
+            reloadConfig();
+        } else if (!getDescription().getVersion().equals(version)) {
+            getLogger().log(
+                    Level.WARNING, "New version detected: {0}->{1}. Saving new default config.", 
+                    new Object[]{(version == null ? "(?)" : version), getDescription().getVersion()}
+            );
+            saveResource("config.yml", true);
+            reloadConfig();
         }
     }
 

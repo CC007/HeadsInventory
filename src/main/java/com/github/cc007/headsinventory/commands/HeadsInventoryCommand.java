@@ -127,6 +127,10 @@ public class HeadsInventoryCommand implements CommandExecutor {
                         sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-io"));
                         plugin.getLogger().severe(t.getText("error-updateheads-updating-io"));
                         plugin.getLogger().log(Level.SEVERE, null, ex2);
+                    } catch (UnsupportedOperationException ex2) {
+                        plugin.getLogger().log(Level.WARNING, null, ex2);
+                        sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-unsupported"));
+                        return;
                     }
                 } catch (MalformedURLException ex) {
                     plugin.getLogger().severe(t.getText("error-updateheads-updating-all-malformedurl"));
@@ -134,6 +138,9 @@ public class HeadsInventoryCommand implements CommandExecutor {
                 } catch (IOException ex) {
                     plugin.getLogger().severe(t.getText("error-updateheads-updating-all-io"));
                     plugin.getLogger().log(Level.SEVERE, null, ex);
+                } catch (UnsupportedOperationException ex) {
+                    plugin.getLogger().log(Level.WARNING, null, ex);
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-unsupported"));
                 }
                 if (sender instanceof Player) {
                     sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("info-updateheads-updating-complete"));
@@ -166,6 +173,10 @@ public class HeadsInventoryCommand implements CommandExecutor {
                     sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-io"));
                     plugin.getLogger().severe(t.getText("error-updateheads-updating-io"));
                     plugin.getLogger().log(Level.SEVERE, null, ex);
+                    return;
+                } catch (UnsupportedOperationException ex) {
+                    plugin.getLogger().log(Level.WARNING, null, ex);
+                    sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-unsupported"));
                     return;
                 } catch (NullPointerException ex) {
                     sender.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-updateheads-updating-empty"));
