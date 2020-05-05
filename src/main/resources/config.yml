@@ -7,13 +7,13 @@ version: ${project.version}
 # Category id 0 means that no category will be displayed there
 # The default category UI will look like this:
 #
-#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
-#   |     food     | alphabet  | blocks  |  interior   |characters |   mobs    |      misc      |pokemon|color |
-#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
-#   |mh-food-drinks|mh-alphabet|mh-blocks|mh-decoration| mh-humans |mh-animals |mh-miscellaneous| Games |      | 
-#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
-#   |              |           |         |   devices   |mh-humanoid|mh-monsters|                |       |      | 
-#   +--------------+-----------+---------+-------------+-----------+-----------+----------------+-------+------+
+#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
+#   |     food     | alphabet  |pokemon| interior |characters|  mobs  |devices |     misc    |color|
+#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
+#   | food-drinks  |  blocks   |animals|decoration|  humans  |humanoid|monsters|miscellaneous|Games|
+#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
+#   |              |           |       |          |          |        |        |             |     |
+#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
 # 
 # You can just as easily add custom categories in here. Also note that you don't have
 # to add all categories in this overview. The categories that are not in the overview
@@ -21,34 +21,33 @@ version: ${project.version}
 # the amount of rows can vary, but the amount of columns always needs to be 9
 menuContents: 
     -
-        - [1,19]
-        - [2,8]
-        - [4,2]
-        - [3,18]
-        - [5,31]
-        - [6,9]
-        - [7,4]
-        - [11,28]
-        - [9,0]
+        - [food,19]
+        - [alphabet,8]
+        - [pokemon,28]
+        - [interior,18]
+        - [characters,31]
+        - [mobs,9]
+        - [devices,0]
+        - [misc,4]
+        - [color,0]
     -
-        - [21,0]
-        - [12,33]
-        - [14,3]
-        - [13,52]
-        - [15,16]
-        - [17,5]
-        - [19,22]
-        - [10,26]
-        - [0,0]
+        - [food-drinks,0]
+        - [blocks,2]
+        - [animals,5]
+        - [decoration,52]
+        - [humans,16]
+        - [humanoid,13]
+        - [monsters,133]
+        - [miscellaneous,22]
+        - [games,26]
     -
-        - [0,0]
-        - [0,0]
-        - [0,0]
-        - [8,0]
-        - [16,13]
-        - [18,133]
-        - [0,0]
-        - [0,0]
-        - [0,0]
+        - [empty,0]
+        - [empty,0]
+        - [empty,0]
+        - [empty,0]
+        - [empty,0]
+        - [empty,0]
+        - [empty,0]
+        - [empty,0]
 
 locale: en_US

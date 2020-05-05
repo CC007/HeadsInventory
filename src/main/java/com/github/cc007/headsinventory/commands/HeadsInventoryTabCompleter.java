@@ -24,17 +24,20 @@
 package com.github.cc007.headsinventory.commands;
 
 import com.github.cc007.headsinventory.HeadsInventory;
-import com.github.cc007.headsplugin.HeadsPlugin;
-import com.github.cc007.headsplugin.utils.heads.HeadsCategory;
+import com.github.cc007.headsplugin.api.HeadsPluginApi;
+import com.github.cc007.headsplugin.api.business.domain.Category;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.util.StringUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.util.StringUtil;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -52,30 +55,29 @@ public class HeadsInventoryTabCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> completions = new ArrayList<>();
+        HeadsPluginApi api = HeadsPluginApi.getInstance();
         if (command.getName().equalsIgnoreCase("updateheads") && args.length == 1) {
             String partialCommand = args[0];
-            Set<String> commands = HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("predefinedcategories").getKeys(false);
-            commands.addAll(HeadsPlugin.getHeadsPlugin().getCategoriesConfig().getConfigurationSection("customcategories").getKeys(false));
+            Set<String> commands = api.getCategorySearcher().getCategories().stream().map(Category::getName).collect(Collectors.toSet());
+            commands.add("all");
+            commands.add("");
             StringUtil.copyPartialMatches(partialCommand, commands, completions);
         }
         if (command.getName().equalsIgnoreCase("headsinventory") && args.length == 1) {
             String partialCommand = args[0];
-            List<String> commands = new ArrayList(Arrays.asList(
+            List<String> commands = Arrays.asList(
                     "cat", "category", "categories",
                     "search", "fsearch", "msearch", "mhsearch",
                     "searchfirst", "fsearchfirst", "msearchfirst", "mhsearchfirst",
                     "getfirst", "fgetfirst", "mgetfirst", "mhgetfirst",
                     "help", ""
-            ));
+            );
             StringUtil.copyPartialMatches(partialCommand, commands, completions);
         }
         if (command.getName().equalsIgnoreCase("headsinventory") && args.length == 2) {
             if (args[0].equalsIgnoreCase("categories") || args[0].equalsIgnoreCase("category") || args[0].equalsIgnoreCase("cat")) {
                 String partialCommand = args[1];
-                List<String> commands = new ArrayList<>();
-                for (HeadsCategory category : HeadsPlugin.getHeadsPlugin().getHeadsUtils().getCategories().getList()) {
-                    commands.add(category.getCategoryName());
-                }
+                Set<String> commands = api.getCategorySearcher().getCategories().stream().map(Category::getName).collect(Collectors.toSet());
                 commands.add("all");
                 commands.add("");
                 StringUtil.copyPartialMatches(partialCommand, commands, completions);
