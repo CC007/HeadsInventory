@@ -26,7 +26,8 @@ package com.github.cc007.headsinventory;
 import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.commands.HeadsInventoryTabCompleter;
 import com.github.cc007.headsinventory.locale.Translator;
-import com.github.cc007.headsplugin.HeadsPlugin;
+import com.github.cc007.headsplugin.api.HeadsPluginApi;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -55,6 +56,13 @@ public class HeadsInventory extends JavaPlugin {
     private Permission permission = null;
     private FileConfiguration config = null;
     private File configFile = null;
+
+
+    @Override
+    public void onLoad() {
+        getLogger().info("Added class loader to HeadsPlugin springClassLoaders");
+        HeadsPluginApi.addSpringClassLoader(getClassLoader());
+    }
 
     @Override
     public void onEnable() {
