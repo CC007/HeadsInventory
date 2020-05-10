@@ -1,19 +1,27 @@
 # used for new version detection
 version: ${project.version}
 
+# language of the interface
+# Supported languages:
+#  - en_US (English)
+#  - nl_NL (Dutch)
+#  - zh_CN (Chinees)
+# Feel free to provide more translations by contacting me on Spigotmc, Github or Discord.
+locale: en_US
+
 # This variable contains the categories that will be displayed in the categories UI
 # the first indented hyphen signifies a row, the second indented hyphen is a column within that row. 
-# The number pair is the category id to link to and the head index in that category to use as category image
-# Category id 0 means that no category will be displayed there
+# The pair is the category name to link to and the head uuid in that category to use as category image
+# Category name "empty" means that no category will be displayed there
 # The default category UI will look like this:
 #
-#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
-#   |     food     | alphabet  |pokemon| interior |characters|  mobs  |devices |     misc    |color|
-#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
-#   | food-drinks  |  blocks   |animals|decoration|  humans  |humanoid|monsters|miscellaneous|Games|
-#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
-#   |              |           |       |          |          |        |        |             |     |
-#   +--------------+-----------+-------+----------+----------+--------+--------+-------------+-----+
+#   +--------------+-----------+-------+----------+----------+--------+--------+-----+-------------+
+#   |     food     | alphabet  |pokemon| interior |characters|  mobs  |devices |color|     misc    |
+#   +--------------+-----------+-------+----------+----------+--------+--------+-----+-------------+
+#   | food-drinks  |  blocks   |animals|decoration|  humans  |humanoid|monsters|Games|miscellaneous|
+#   +--------------+-----------+-------+----------+----------+--------+--------+-----+-------------+
+#   |              |           |       |          |          |        |        |     |             |
+#   +--------------+-----------+-------+----------+----------+--------+--------+-----+-------------+
 # 
 # You can just as easily add custom categories in here. Also note that you don't have
 # to add all categories in this overview. The categories that are not in the overview
@@ -21,33 +29,22 @@ version: ${project.version}
 # the amount of rows can vary, but the amount of columns always needs to be 9
 menuContents: 
     -
-        - [food,19]
-        - [alphabet,8]
-        - [pokemon,28]
-        - [interior,18]
-        - [characters,31]
-        - [mobs,9]
-        - [devices,0]
-        - [misc,4]
-        - [color,0]
+        - [food, b48503a4-6dec-438c-a3bc-6b5da7fb1fde]
+        - [alphabet, 43301036-b35e-43a7-aa20-d80a65af34b1]
+        - [pokemon, 4df31c2f-01c2-4f61-aaf3-41282f136340]
+        - [interior,5643c809-8d5c-40c6-949c-666c460fe7da]
+        - [characters, 297447ae-1a42-447c-9bfd-dc342e5c770b]
+        - [mobs, 807f287f-6499-4e93-a887-0a298ab3091f]
+        - [devices, df045cc0-7ec9-4cbc-8219-2ea32ee0cd84]
+        - [color, 2a83c29f-748a-4298-aa11-e5022fc62be0]
+        - [misc, 0beedb99-f64e-4a26-93f3-8f3af84050aa]
     -
-        - [food-drinks,0]
-        - [blocks,2]
-        - [animals,5]
-        - [decoration,52]
-        - [humans,16]
-        - [humanoid,13]
-        - [monsters,133]
-        - [miscellaneous,22]
-        - [games,26]
-    -
-        - [empty,0]
-        - [empty,0]
-        - [empty,0]
-        - [empty,0]
-        - [empty,0]
-        - [empty,0]
-        - [empty,0]
-        - [empty,0]
-
-locale: en_US
+        - [food-drinks, a4468154-c0f9-b068-3cd0-fda8032f2e71]
+        - [blocks, 8f886f11-bb75-4de2-be35-7e1f08c221ae]
+        - [animals, 2a6d43f7-d0cf-41ca-9e54-ced89abd152a]
+        - [decoration, ed198559-89c3-4882-9600-2a472a9b9875]
+        - [humans, 4b495b2d-20ab-457a-a75c-5371225921ee]
+        - [humanoid, c4ee6799-a7ff-45d6-b863-54afe0e14cb5]
+        - [monsters, 06f50108-1fc8-4321-8ed4-59f58a44a632]
+        - [games, 3425e391-fc10-4ee0-96b8-7a74d09665d8]
+        - [miscellaneous, 0e486e35-dc83-41d5-aae1-7c73f4da4b60]

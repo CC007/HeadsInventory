@@ -30,12 +30,13 @@ import com.github.cc007.headsplugin.api.business.domain.Category;
 import com.github.cc007.headsplugin.api.business.domain.Head;
 import com.github.cc007.headsplugin.api.business.services.heads.CategorySearcher;
 import com.github.cc007.headsplugin.api.business.services.heads.HeadCreator;
+import com.github.cc007.headsplugin.api.business.services.heads.HeadSearcher;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -58,6 +59,9 @@ import org.bukkit.inventory.ItemStack;
  */
 public class CategoriesMenu implements Listener {
 
+    private final int CATEGORY_NAME_INDEX = 0;
+    private final int CATEGORY_HEAD_UUID_INDEX = 1;
+
     private Inventory inventory;
     private Player player;
 
@@ -69,11 +73,12 @@ public class CategoriesMenu implements Listener {
         Translator t = HeadsInventory.getTranslator();
         HeadsPluginApi api = HeadsPluginApi.getInstance();
         CategorySearcher categorySearcher = api.getCategorySearcher();
+        HeadSearcher headSearcher = api.getHeadSearcher();
         HeadCreator headCreator = api.getHeadCreator();
 
         if (inventory == null) {
             FileConfiguration config = Objects.requireNonNull(HeadsInventory.getPlugin()).getConfig();
-            List<List<List<?>>> rows = getMenuContents(config);
+            List<List<List<String>>> rows = getMenuContents(config);
             inventory = Bukkit.createInventory(player, rows.size() * 9, ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + t.getText("categoriesmenu-gui-categoriestitle") + ":");
 
             List<Category> categories = categorySearcher.getCategories()
@@ -82,9 +87,10 @@ public class CategoriesMenu implements Listener {
                     .collect(Collectors.toList());
 
             for (int i = 0; i < rows.size(); i++) {
-                List<List<?>> cols = rows.get(i);
+                List<List<String>> cols = rows.get(i);
                 for (int j = 0; j < cols.size(); j++) {
-                    String categoryName = (String) cols.get(j).get(0);
+                    List<String> categoryTuple = cols.get(j);
+                    String categoryName = categoryTuple.get(CATEGORY_NAME_INDEX);
                     if (!"empty".equals(categoryName)) {
                         Optional<Category> optionalCategory = categories.stream()
                                 .filter((c) -> c.getName().equals(categoryName))
@@ -96,8 +102,10 @@ public class CategoriesMenu implements Listener {
                         }
                         Category category = optionalCategory.get();
 
-                        Integer headIndex = (Integer) cols.get(j).get(1);
-                        Head showHead = new ArrayList<>(categorySearcher.getCategoryHeads(category)).get(headIndex);
+                        UUID headUuid = UUID.fromString(categoryTuple.get(CATEGORY_HEAD_UUID_INDEX));
+                        Head showHead = headSearcher.getHead(headUuid)
+                                .orElseThrow(() -> new IllegalArgumentException("UUID for category head overview not valid (category: " + categoryName + ")"));
+
                         showHead.setName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
                         ItemStack showHeadItem = headCreator.getItemStack(showHead);
 
@@ -113,8 +121,8 @@ public class CategoriesMenu implements Listener {
     }
 
     @SuppressWarnings("unchecked")
-    private List<List<List<?>>> getMenuContents(FileConfiguration config) {
-        return (List<List<List<?>>>) config.get("menuContents");
+    private List<List<List<String>>> getMenuContents(FileConfiguration config) {
+        return (List<List<List<String>>>) config.get("menuContents");
     }
 
     public final void registerEvents() {
@@ -156,13 +164,13 @@ public class CategoriesMenu implements Listener {
 
         int row = slot / 9;
         int col = slot % 9;
-        List<List<List<?>>> rows = getMenuContents(config);
+        List<List<List<String>>> rows = getMenuContents(config);
 
         if ((slot < 0 || row > rows.size() - 1)) {
             return;
         }
-        List<?> cell = rows.get(row).get(col);
-        String categoryName = (String) cell.get(0);
+        List<String> categoryTuple = rows.get(row).get(col);
+        String categoryName = categoryTuple.get(CATEGORY_NAME_INDEX);
         if ("empty".equals(categoryName)) {
             return;
         }

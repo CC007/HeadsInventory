@@ -134,40 +134,55 @@ public class HeadsInventoryPage implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         Translator t = HeadsInventory.getTranslator();
+        // if the click is for a different inventory view, ignore event
         if (!event.getView().getTitle().equals(menu.getMenuName() + " " + t.getText("headsinvpage-gui-page") + " " + pageNr + "/" + menu.getPageCount())) {
             return;
         }
 
+        // if a different player clicked, ignore event
         if (menu.getPlayer() != null && !event.getWhoClicked().equals(menu.getPlayer())) {
             return;
         }
+        // now we know that this is the right inventory, so you shouldn't be able to pick up any item in the inventory
         event.setCancelled(true);
 
+        // ignore anything but left-clicks
         if (event.getClick() != ClickType.LEFT) {
             return;
         }
+
+        // get the slot that was clicked and check if it is in the right part of the inventory
+        // and not in the player's own inventory
         int slot = event.getRawSlot();
         if ((slot < 0 || slot >= menu.getInventorySize()) || !items.containsKey(slot)) {
             return;
         }
 
+        // check if it is any of the slots that contain heads and if so give that head to the player
         if (slot / 9 != menu.getRowCount()) {
             menu.getPlayer().getInventory().addItem(items.get(slot));
             Bukkit.getServer().getPluginManager().callEvent(new HeadGivenEvent(menu.getPlayer(), items.get(slot), menu.getPlayer().getWorld(), new Date()));
             menu.getPlayer().sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GREEN + t.getText("search-info-headgiven"));
             return;
         }
+
+        // check if the previous button was clicked and if so open the previous page
         if (slot == menu.getRowCount() * 9) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(Objects.requireNonNull(HeadsInventory.getPlugin()), () -> {
                 menu.getInventoryPages().get(pageNr - 2).open();
             }, 5);
+            HandlerList.unregisterAll(this);
             return;
         }
+        // check if the next button was clicked and if so open the next page
         if (slot == ((menu.getRowCount() + 1) * 9) - 1) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(Objects.requireNonNull(HeadsInventory.getPlugin()), () -> {
                 menu.getInventoryPages().get(pageNr).open();
             }, 5);
+            HandlerList.unregisterAll(this);
+            return;
         }
+        // only other button could be the close button, so close the inventory
         menu.getPlayer().updateInventory();
         Bukkit.getScheduler().scheduleSyncDelayedTask(Objects.requireNonNull(HeadsInventory.getPlugin()), () -> {
             menu.getPlayer().closeInventory();
