@@ -91,7 +91,8 @@ public class HeadsInventoryCommand implements CommandExecutor {
 
     private boolean onUpdateHeadsCommand(final CommandSender sender, final String[] args) {
         // From now on handled by HeadsPluginAPI
-        Bukkit.getServer().dispatchCommand(sender, "headspluginapi update " + String.join(", ", args));
+        String updateCommandMoved = "Use /headspluginapi update " + String.join(", ", args) + " instead.";
+        HeadsInventory.getPlugin().getLogger().info(updateCommandMoved.replaceAll("\\s+", " "));
         return true;
     }
 
