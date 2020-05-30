@@ -29,15 +29,8 @@ import com.github.cc007.headsplugin.api.HeadsPluginApi;
 import com.github.cc007.headsplugin.api.business.domain.Category;
 import com.github.cc007.headsplugin.api.business.domain.Head;
 import com.github.cc007.headsplugin.api.business.services.heads.CategorySearcher;
-import com.github.cc007.headsplugin.api.business.services.heads.HeadCreator;
 import com.github.cc007.headsplugin.api.business.services.heads.HeadSearcher;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.github.cc007.headsplugin.api.business.services.heads.HeadToItemstackMapper;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -53,8 +46,14 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 /**
- *
  * @author Rik Schaaf aka CC007 (http://coolcat007.nl/)
  */
 public class CategoriesMenu implements Listener {
@@ -74,7 +73,7 @@ public class CategoriesMenu implements Listener {
         HeadsPluginApi api = HeadsPluginApi.getInstance();
         CategorySearcher categorySearcher = api.getCategorySearcher();
         HeadSearcher headSearcher = api.getHeadSearcher();
-        HeadCreator headCreator = api.getHeadCreator();
+        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
 
         if (inventory == null) {
             FileConfiguration config = Objects.requireNonNull(HeadsInventory.getPlugin()).getConfig();
@@ -107,7 +106,7 @@ public class CategoriesMenu implements Listener {
                                 .orElseThrow(() -> new IllegalArgumentException("UUID for category head overview not valid (category: " + categoryName + ")"));
 
                         showHead.setName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
-                        ItemStack showHeadItem = headCreator.getItemStack(showHead);
+                        ItemStack showHeadItem = headToItemstackMapper.getItemStack(showHead);
 
                         inventory.setItem(i * 9 + j, showHeadItem);
                     }

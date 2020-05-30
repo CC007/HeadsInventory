@@ -32,6 +32,7 @@ import com.github.cc007.headsplugin.api.business.domain.Head;
 import com.github.cc007.headsplugin.api.business.services.heads.CategorySearcher;
 import com.github.cc007.headsplugin.api.business.services.heads.HeadCreator;
 import com.github.cc007.headsplugin.api.business.services.heads.HeadSearcher;
+import com.github.cc007.headsplugin.api.business.services.heads.HeadToItemstackMapper;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -45,6 +46,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,40 +58,21 @@ public class HeadsSearch {
 
     public static void saveHead(Player player, String headName) {
         Translator t = HeadsInventory.getTranslator();
+        HeadsPluginApi api = HeadsPluginApi.getInstance();
+        HeadCreator headCreator = api.getHeadCreator();
+        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
 
-        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-error-addhead-failure"));
+        Map<String, Head> newHeadsMap = headCreator.createHead(player, headName);
+        if (newHeadsMap.size() == 0) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("addhead-msg-failure"));
+            return;
+        }
 
-//        Head newHead = null;
-//        try {
-//            HeadsUtils hu = HeadsUtils.getInstance();
-//            hu.setDatabaseLoader(new MineSkinLoader());
-//            newHead = hu.saveHead(player, headName);
-//            hu.setDatabaseLoader(HeadsPlugin.getDefaultDatabaseLoader());
-//        } catch (SocketTimeoutException ex) {
-//            Bukkit.getLogger().log(Level.SEVERE, ex.getMessage());
-//            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-sockettimeout"));
-//            return;
-//        } catch (MalformedURLException ex) {
-//            // prob no heads found
-//            Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-malformedurl"), ex);
-//        } catch (UnknownHostException ex) {
-//            Bukkit.getLogger().log(Level.WARNING, t.getText("search-warning-unknownhost"), ex);
-//        } catch (IOException ex) {
-//            Bukkit.getLogger().log(Level.SEVERE, null, ex);
-//            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-msg-io"));
-//            return;
-//        } catch (AuthenticationException ex) {
-//            //legacy exception
-//            Bukkit.getLogger().log(Level.SEVERE, null, ex);
-//            return;
-//        }
-//        if (newHead == null) {
-//            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("search-error-addhead-failure"));
-//            return;
-//        }
-//        ItemStack newHeadStack = HeadCreator.getItemStack(newHead);
-//        putHeadInInventory(newHeadStack, player);
-//        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("search-error-addhead-success"));
+        for (Head newHead : newHeadsMap.values()) {
+            ItemStack newHeadStack = headToItemstackMapper.getItemStack(newHead);
+            putHeadInInventory(newHeadStack, player);
+        }
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("addhead-msg-success"));
     }
 
     public static void myHead(Player player) {
@@ -138,10 +121,10 @@ public class HeadsSearch {
         //TODO support searchdatabase
         Translator t = HeadsInventory.getTranslator();
         HeadsPluginApi api = HeadsPluginApi.getInstance();
-        HeadCreator headCreator = api.getHeadCreator();
+        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
         HeadSearcher headSearcher = api.getHeadSearcher();
         Thread thread = new Thread(() -> {
-            ItemStack headStack = headCreator.getItemStack(headSearcher.getHeads(searchString).get(0));
+            ItemStack headStack = headToItemstackMapper.getItemStack(headSearcher.getHeads(searchString).get(0));
 
             if (headStack == null) {
                 player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.GOLD + t.getText("search-msg-search-noheads"));
@@ -212,9 +195,9 @@ public class HeadsSearch {
     private static boolean showInventory(String menuName, Player player, List<Head> categoryHeads, ChatColor noHeadsColor) {
         Translator t = HeadsInventory.getTranslator();
         HeadsPluginApi api = HeadsPluginApi.getInstance();
-        HeadCreator headCreator = api.getHeadCreator();
+        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
 
-        List<ItemStack> headStacks = headCreator.getItemStacks(categoryHeads);
+        List<ItemStack> headStacks = headToItemstackMapper.getItemStacks(categoryHeads);
         if (headStacks == null || headStacks.isEmpty()) {
             player.sendMessage(HeadsInventory.pluginChatPrefix(true) + noHeadsColor + t.getText("search-msg-search-noheads"));
             return false;
