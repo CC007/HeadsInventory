@@ -123,6 +123,9 @@ public class HeadsSearch {
         HeadsPluginApi api = HeadsPluginApi.getInstance();
         HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
         HeadSearcher headSearcher = api.getHeadSearcher();
+
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("search-msg-search-busy"));
+
         Thread thread = new Thread(() -> {
             ItemStack headStack = headToItemstackMapper.getItemStack(headSearcher.getHeads(searchString).get(0));
 
@@ -139,8 +142,11 @@ public class HeadsSearch {
 
     public static void search(final Player player, final String searchString, final String searchDatabase) {
         //TODO support searchdatabase
+        Translator t = HeadsInventory.getTranslator();
         HeadSearcher headSearcher = HeadsPluginApi.getInstance()
                 .getHeadSearcher();
+
+        player.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("search-msg-search-busy"));
 
         Thread thread = new Thread(() -> {
             List<Head> heads = headSearcher.getHeads(searchString);
