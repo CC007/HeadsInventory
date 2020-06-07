@@ -220,7 +220,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
         return validateArgsAndSearch(player, args, HeadsSearch::searchFirst);
     }
 
-    private boolean validateArgsAndSearch(Player player, String[] args, TriConsumer<Player, String, String> searchFirst) {
+    private boolean validateArgsAndSearch(Player player, String[] args, TriConsumer<Player, String, String> searchConsumer) {
         Translator t = HeadsInventory.getTranslator();
         if (args.length < 2) {
             player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-search-nosearchterm"));
@@ -234,7 +234,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
         String searchDatabase = args[0].startsWith("mh") ? "minecraftheads" : args[0].startsWith("m") ? "mineskin" : args[0].startsWith("f") ? "freshcoal" : "default";
         String[] searchArgs = new String[args.length - 1];
         System.arraycopy(args, 1, searchArgs, 0, searchArgs.length);
-        searchFirst.accept(player, Joiner.on(" ").join(searchArgs), searchDatabase);
+        searchConsumer.accept(player, Joiner.on(" ").join(searchArgs), searchDatabase);
         return true;
     }
 
