@@ -45,22 +45,36 @@ public class HeadsInventoryMenu {
         this.menuName = menuName;
         this.inventoryPages = new ArrayList<>();
         this.player = player;
+        initInventoryPages(heads);
+    }
+
+    private void initInventoryPages(List<ItemStack> heads) {
         HeadsInventoryPage currentPage = null;
         int i = 0;
         for (ItemStack head : heads) {
+            //if this will be the first item of a new page
             if (i == 0) {
+                //increase the page count
                 pageCount++;
+                //if there now will be more than 1 page
                 if (pageCount > 1) {
+                    //add the right arrow item on the previous page
                     currentPage.setRightArrow();
                 }
+                //create the new page
                 currentPage = new HeadsInventoryPage(this, pageCount);
                 inventoryPages.add(currentPage);
+                //add the down arrow item
                 currentPage.setDownArrow();
+                //if there now will be more than 1 page
                 if (pageCount > 1) {
+                    //add the left arrow item on the new page
                     currentPage.setLeftArrow();
                 }
             }
+            //add the head to the current page
             currentPage.putHead(i, head);
+            //increment the i counter mod the total inventory size (9 columns and the specified amount of rows)
             i = (i + 1) % (9 * rowCount);
         }
     }

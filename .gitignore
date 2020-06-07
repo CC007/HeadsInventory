@@ -15,3 +15,7 @@ hs_err_pid*
 /nb-configuration.xml
 /nbactions-release-profile.xml
 /nbactions-snapshot-profile.xml
+
+# Intellij specific
+/.idea/
+*.iml
