@@ -83,12 +83,10 @@ public class HeadsInventory extends JavaPlugin {
         getCommand("myhead").setExecutor(hic);
         getCommand("playerhead").setExecutor(hic);
         getCommand("addhead").setExecutor(hic);
-        getCommand("updateheads").setExecutor(hic);
 
         /* Register tab completers*/
         HeadsInventoryTabCompleter hitc = new HeadsInventoryTabCompleter(this);
         getCommand("headsinventory").setTabCompleter(hitc);
-        getCommand("updateheads").setTabCompleter(hitc);
     }
 
     @Override
