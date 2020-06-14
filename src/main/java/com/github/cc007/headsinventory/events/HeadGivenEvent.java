@@ -23,7 +23,6 @@
  */
 package com.github.cc007.headsinventory.events;
 
-import com.github.cc007.headsplugin.utils.heads.Head;
 import java.util.Date;
 import org.bukkit.World;
 import org.bukkit.entity.Player;

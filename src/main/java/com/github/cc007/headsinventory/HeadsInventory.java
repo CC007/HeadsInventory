@@ -26,7 +26,8 @@ package com.github.cc007.headsinventory;
 import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.commands.HeadsInventoryTabCompleter;
 import com.github.cc007.headsinventory.locale.Translator;
-import com.github.cc007.headsplugin.HeadsPlugin;
+import com.github.cc007.headsplugin.api.HeadsPluginApi;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import net.milkbowl.vault.permission.Permission;
 import org.apache.commons.lang.LocaleUtils;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -56,11 +58,21 @@ public class HeadsInventory extends JavaPlugin {
     private FileConfiguration config = null;
     private File configFile = null;
 
+
+    @Override
+    public void onLoad() {
+        getLogger().info("Added class loader to HeadsPlugin springClassLoaders");
+        HeadsPluginApi.addSpringClassLoader(getClassLoader());
+    }
+
     @Override
     public void onEnable() {
         /* Config stuffs */
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
+
+        /* Configure BStats metrics */
+        Metrics metrics = new Metrics(this, 5875);
 
         /* Setup plugin hooks */
         vault = getPlugin("Vault");
@@ -75,12 +87,10 @@ public class HeadsInventory extends JavaPlugin {
         getCommand("myhead").setExecutor(hic);
         getCommand("playerhead").setExecutor(hic);
         getCommand("addhead").setExecutor(hic);
-        getCommand("updateheads").setExecutor(hic);
 
         /* Register tab completers*/
         HeadsInventoryTabCompleter hitc = new HeadsInventoryTabCompleter(this);
         getCommand("headsinventory").setTabCompleter(hitc);
-        getCommand("updateheads").setTabCompleter(hitc);
     }
 
     @Override

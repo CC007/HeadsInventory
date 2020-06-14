@@ -19,9 +19,6 @@ commands:
     playerhead:
         description: "Receive another player's head"
         aliases: [plyrhd]
-    updateheads:
-        description: "update the cached heads"
-        aliases: [updatehds]
     heads:
         description: "shows help page"
         aliases: []
@@ -32,8 +29,6 @@ permissions:
         description: Allows the user to get another player's head
     headsinv.inventory:
         description: Allows the user to use the heads inventory
-    headsinv.update:
-        description: Allows the user to update the heads categories
     headsinv.search:
         description: Allows the user to search directly for heads from the database
     headsinv.add:
