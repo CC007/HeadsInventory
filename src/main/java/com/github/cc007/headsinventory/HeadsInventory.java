@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import net.milkbowl.vault.permission.Permission;
 import org.apache.commons.lang.LocaleUtils;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -70,6 +71,9 @@ public class HeadsInventory extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
 
+        /* Configure BStats metrics */
+        Metrics metrics = new Metrics(this, 5875);
+
         /* Setup plugin hooks */
         vault = getPlugin("Vault");
         if (vault != null) {
@@ -83,12 +87,10 @@ public class HeadsInventory extends JavaPlugin {
         getCommand("myhead").setExecutor(hic);
         getCommand("playerhead").setExecutor(hic);
         getCommand("addhead").setExecutor(hic);
-        getCommand("updateheads").setExecutor(hic);
 
         /* Register tab completers*/
         HeadsInventoryTabCompleter hitc = new HeadsInventoryTabCompleter(this);
         getCommand("headsinventory").setTabCompleter(hitc);
-        getCommand("updateheads").setTabCompleter(hitc);
     }
 
     @Override
