@@ -34,6 +34,7 @@ import com.github.cc007.headsplugin.api.business.services.heads.HeadToItemstackM
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,6 +46,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Comparator;
 import java.util.List;
@@ -96,17 +98,24 @@ public class CategoriesMenu implements Listener {
                                 .findAny();
                         if (!optionalCategory.isPresent()) {
                             player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("categoriesmenu-error-categorynotloaded"));
-                            HeadsInventory.getPlugin().getLogger().warning(t.getText("categoriesmenu-warning-categorynotloaded"));
-                            return;
+                            HeadsInventory.getPlugin().getLogger().warning(t.getText("categoriesmenu-warning-categorynotloaded") + "(category: " + categoryName + ")");
+                            continue;
                         }
-                        Category category = optionalCategory.get();
 
                         UUID headUuid = UUID.fromString(categoryTuple.get(CATEGORY_HEAD_UUID_INDEX));
-                        Head showHead = headSearcher.getHead(headUuid)
-                                .orElseThrow(() -> new IllegalArgumentException("UUID for category head overview not valid (category: " + categoryName + ")"));
-
-                        showHead.setName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
-                        ItemStack showHeadItem = headToItemstackMapper.getItemStack(showHead);
+                        ItemStack showHeadItem = headSearcher.getHead(headUuid)
+                                .map(showHead -> {
+                                    showHead.setName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
+                                    return headToItemstackMapper.getItemStack(showHead);
+                                })
+                                .orElseGet(() -> {
+                                    HeadsInventory.getPlugin().getLogger().warning(t.getText("categoriesmenu-warning-headnotavailable") + "(category: " + categoryName + ")");
+                                    ItemStack headItem = new ItemStack(Material.PLAYER_HEAD);
+                                    SkullMeta headItemMeta = (SkullMeta) headItem.getItemMeta();
+                                    headItemMeta.setDisplayName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
+                                    headItem.setItemMeta(headItemMeta);
+                                    return headItem;
+                                });
 
                         inventory.setItem(i * 9 + j, showHeadItem);
                     }
