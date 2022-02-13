@@ -26,6 +26,7 @@ package com.github.cc007.headsinventory.inventory;
 import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsplugin.api.HeadsPluginApi;
+import com.github.cc007.headsplugin.api.HeadsPluginServices;
 import com.github.cc007.headsplugin.api.business.domain.Category;
 import com.github.cc007.headsplugin.api.business.domain.Head;
 import com.github.cc007.headsplugin.api.business.services.heads.CategorySearcher;
@@ -72,10 +73,10 @@ public class CategoriesMenu implements Listener {
 
     public void open() {
         Translator t = HeadsInventory.getTranslator();
-        HeadsPluginApi api = HeadsPluginApi.getInstance();
-        CategorySearcher categorySearcher = api.getCategorySearcher();
-        HeadSearcher headSearcher = api.getHeadSearcher();
-        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
+        HeadsPluginServices apiServices = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new);
+        CategorySearcher categorySearcher = apiServices.categorySearcher();
+        HeadSearcher headSearcher = apiServices.headSearcher();
+        HeadToItemstackMapper headToItemstackMapper = apiServices.headToItemstackMapper();
 
         if (inventory == null) {
             FileConfiguration config = Objects.requireNonNull(HeadsInventory.getPlugin()).getConfig();

@@ -59,12 +59,6 @@ public class HeadsInventory extends JavaPlugin {
     private File configFile = null;
 
     @Override
-    public void onLoad() {
-        getLogger().info("Added class loader to HeadsPlugin springClassLoaders");
-        HeadsPluginApi.addSpringClassLoader(getClassLoader());
-    }
-
-    @Override
     public void onEnable() {
         /* Config stuffs */
         getConfig().options().copyDefaults(true);
