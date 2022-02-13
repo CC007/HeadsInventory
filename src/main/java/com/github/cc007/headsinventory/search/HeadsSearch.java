@@ -27,6 +27,7 @@ import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsinventory.inventory.HeadsInventoryMenu;
 import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsplugin.api.HeadsPluginApi;
+import com.github.cc007.headsplugin.api.HeadsPluginServices;
 import com.github.cc007.headsplugin.api.business.domain.Category;
 import com.github.cc007.headsplugin.api.business.domain.Head;
 import com.github.cc007.headsplugin.api.business.services.heads.CategorySearcher;
@@ -58,9 +59,9 @@ public class HeadsSearch {
 
     public static void saveHead(Player player, String headName) {
         Translator t = HeadsInventory.getTranslator();
-        HeadsPluginApi api = HeadsPluginApi.getInstance();
-        HeadCreator headCreator = api.getHeadCreator();
-        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
+        HeadsPluginServices apiServices = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new);
+        HeadCreator headCreator = apiServices.headCreator();
+        HeadToItemstackMapper headToItemstackMapper = apiServices.headToItemstackMapper();
 
         Map<String, Head> newHeadsMap = headCreator.createHead(player, headName);
         if (newHeadsMap.size() == 0) {
@@ -120,9 +121,9 @@ public class HeadsSearch {
     public static void searchFirst(final Player player, final String searchString, final String searchDatabase) {
         //TODO support searchdatabase
         Translator t = HeadsInventory.getTranslator();
-        HeadsPluginApi api = HeadsPluginApi.getInstance();
-        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
-        HeadSearcher headSearcher = api.getHeadSearcher();
+        HeadsPluginServices apiServices = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new);
+        HeadToItemstackMapper headToItemstackMapper = apiServices.headToItemstackMapper();
+        HeadSearcher headSearcher = apiServices.headSearcher();
 
         player.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("search-msg-search-busy"));
 
@@ -143,8 +144,8 @@ public class HeadsSearch {
     public static void search(final Player player, final String searchString, final String searchDatabase) {
         //TODO support searchdatabase
         Translator t = HeadsInventory.getTranslator();
-        HeadSearcher headSearcher = HeadsPluginApi.getInstance()
-                .getHeadSearcher();
+        HeadSearcher headSearcher = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new)
+                .headSearcher();
 
         player.sendMessage(HeadsInventory.pluginChatPrefix(true) + t.getText("search-msg-search-busy"));
 
@@ -157,8 +158,8 @@ public class HeadsSearch {
 
     public static boolean searchAllCategories(Player player) {
         Translator t = HeadsInventory.getTranslator();
-        CategorySearcher categorySearcher = HeadsPluginApi.getInstance()
-                .getCategorySearcher();
+        CategorySearcher categorySearcher = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new)
+                .categorySearcher();
 
         List<Head> allCategoriesHeads = categorySearcher.getCategories()
                 .stream()
@@ -173,8 +174,8 @@ public class HeadsSearch {
 
     public static boolean searchCategory(Player player, String categoryName) {
         Translator t = HeadsInventory.getTranslator();
-        CategorySearcher categorySearcher = HeadsPluginApi.getInstance()
-                .getCategorySearcher();
+        CategorySearcher categorySearcher = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new)
+                .categorySearcher();
 
         // check if given category name exists
         boolean categoryExists = false;
@@ -200,8 +201,8 @@ public class HeadsSearch {
 
     private static boolean showInventory(String menuName, Player player, List<Head> categoryHeads, ChatColor noHeadsColor) {
         Translator t = HeadsInventory.getTranslator();
-        HeadsPluginApi api = HeadsPluginApi.getInstance();
-        HeadToItemstackMapper headToItemstackMapper = api.getHeadToItemstackMapper();
+        HeadsPluginServices apiServices = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new);
+        HeadToItemstackMapper headToItemstackMapper = apiServices.headToItemstackMapper();
 
         List<ItemStack> headStacks = headToItemstackMapper.getItemStacks(categoryHeads);
         if (headStacks == null || headStacks.isEmpty()) {
@@ -227,8 +228,8 @@ public class HeadsSearch {
     }
 
     public static void sendCategoriesList(CommandSender sender) {
-        CategorySearcher categorySearcher = HeadsPluginApi.getInstance()
-                .getCategorySearcher();
+        CategorySearcher categorySearcher = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new)
+                .categorySearcher();
 
         String categoryNames = categorySearcher.getCategories()
                 .stream()
