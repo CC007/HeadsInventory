@@ -26,14 +26,7 @@ package com.github.cc007.headsinventory;
 import com.github.cc007.headsinventory.commands.HeadsInventoryCommand;
 import com.github.cc007.headsinventory.commands.HeadsInventoryTabCompleter;
 import com.github.cc007.headsinventory.locale.Translator;
-import com.github.cc007.headsplugin.api.HeadsPluginApi;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
 import net.milkbowl.vault.permission.Permission;
 import org.apache.commons.lang.LocaleUtils;
 import org.bstats.bukkit.Metrics;
@@ -44,6 +37,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
 
 /**
  *
