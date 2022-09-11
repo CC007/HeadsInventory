@@ -28,7 +28,7 @@ import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsplugin.api.HeadsPluginApi;
 import com.github.cc007.headsplugin.api.HeadsPluginServices;
 import com.github.cc007.headsplugin.api.business.domain.Category;
-import com.github.cc007.headsplugin.api.business.domain.Head;
+import com.github.cc007.headsplugin.api.business.domain.exceptions.LockingException;
 import com.github.cc007.headsplugin.api.business.services.heads.CategorySearcher;
 import com.github.cc007.headsplugin.api.business.services.heads.HeadSearcher;
 import com.github.cc007.headsplugin.api.business.services.heads.HeadToItemstackMapper;
@@ -54,94 +54,119 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author Rik Schaaf aka CC007 (http://coolcat007.nl/)
  */
 public class CategoriesMenu implements Listener {
 
-    private final int CATEGORY_NAME_INDEX = 0;
-    private final int CATEGORY_HEAD_UUID_INDEX = 1;
+    private static final int CATEGORY_NAME_INDEX = 0;
+    private static final int CATEGORY_HEAD_UUID_INDEX = 1;
 
-    private Inventory inventory;
-    private Player player;
+    private static final CategorySearcher categorySearcher;
+    private static final HeadSearcher headSearcher;
+    private static final HeadToItemstackMapper headToItemstackMapper;
+    private static final Translator translator;
+    private static final HeadsInventory plugin;
 
-    public CategoriesMenu(Player player) {
+
+    static {
+        HeadsPluginServices apiServices = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new);
+        categorySearcher = apiServices.categorySearcher();
+        headSearcher = apiServices.headSearcher();
+        headToItemstackMapper = apiServices.headToItemstackMapper();
+        translator = HeadsInventory.getTranslator();
+        plugin = Objects.requireNonNull(HeadsInventory.getPlugin());
+    }
+
+    private final Player player;
+    private final Inventory categoriesInventory;
+
+    public CategoriesMenu(Player player) throws LockingException {
         this.player = player;
+        this.categoriesInventory = createCategoriesInventory();
+    }
+
+    private Inventory createCategoriesInventory() throws LockingException {
+        FileConfiguration config = plugin.getConfig();
+        List<List<CategoryIcon>> rows = getMenuContents(config);
+        Inventory categoriesInventory = Bukkit.createInventory(player, rows.size() * 9, ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + translator.getText("categoriesmenu-gui-categoriestitle") + ":");
+
+        List<Category> categories = getSortedCategories();
+
+        for (int rowIdx = 0; rowIdx < rows.size(); rowIdx++) {
+            List<CategoryIcon> cols = rows.get(rowIdx);
+            for (int colIdx = 0; colIdx < cols.size(); colIdx++) {
+                CategoryIcon categoryIcon = cols.get(colIdx);
+                setCategoryItemFromIcon(categoriesInventory, categories, rowIdx, colIdx, categoryIcon);
+            }
+        }
+        return categoriesInventory;
+    }
+
+    private List<Category> getSortedCategories() {
+        return categorySearcher.getCategories()
+                .stream()
+                .sorted(Comparator.comparing(Category::getName))
+                .toList();
+    }
+
+    private void setCategoryItemFromIcon(Inventory categoriesInventory, List<Category> categories, int rowIdx, int colIdx, CategoryIcon categoryIcon) {
+        String categoryName = categoryIcon.categoryName();
+        if (!"empty".equals(categoryName)) {
+            Optional<Category> optionalCategory = categories.stream()
+                    .filter((c) -> c.getName().equals(categoryName))
+                    .findAny();
+            if (optionalCategory.isEmpty()) {
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + translator.getText("categoriesmenu-error-categorynotloaded"));
+                HeadsInventory.getPlugin().getLogger().warning(translator.getText("categoriesmenu-warning-categorynotloaded") + "(category: " + categoryName + ")");
+                return;
+            }
+
+            UUID headUuid = UUID.fromString(categoryIcon.categoryHeadUuid());
+            ItemStack showHeadItem = headSearcher.getHead(headUuid)
+                    .map(showHead -> {
+                        showHead.setName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
+                        return headToItemstackMapper.getItemStack(showHead);
+                    })
+                    .orElseGet(() -> {
+                        HeadsInventory.getPlugin().getLogger().warning(translator.getText("categoriesmenu-warning-headnotavailable") + "(category: " + categoryName + ")");
+                        ItemStack headItem = new ItemStack(Material.PLAYER_HEAD);
+                        if (headItem.getItemMeta() instanceof SkullMeta headItemMeta) {
+                            headItemMeta.setDisplayName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
+                            headItem.setItemMeta(headItemMeta);
+                        }
+                        return headItem;
+                    });
+
+            categoriesInventory.setItem(rowIdx * 9 + colIdx, showHeadItem);
+        }
     }
 
     public void open() {
-        Translator t = HeadsInventory.getTranslator();
-        HeadsPluginServices apiServices = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new);
-        CategorySearcher categorySearcher = apiServices.categorySearcher();
-        HeadSearcher headSearcher = apiServices.headSearcher();
-        HeadToItemstackMapper headToItemstackMapper = apiServices.headToItemstackMapper();
-
-        if (inventory == null) {
-            FileConfiguration config = Objects.requireNonNull(HeadsInventory.getPlugin()).getConfig();
-            List<List<List<String>>> rows = getMenuContents(config);
-            inventory = Bukkit.createInventory(player, rows.size() * 9, ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + t.getText("categoriesmenu-gui-categoriestitle") + ":");
-
-            List<Category> categories = categorySearcher.getCategories()
-                    .stream()
-                    .sorted(Comparator.comparing(Category::getName))
-                    .collect(Collectors.toList());
-
-            for (int i = 0; i < rows.size(); i++) {
-                List<List<String>> cols = rows.get(i);
-                for (int j = 0; j < cols.size(); j++) {
-                    List<String> categoryTuple = cols.get(j);
-                    String categoryName = categoryTuple.get(CATEGORY_NAME_INDEX);
-                    if (!"empty".equals(categoryName)) {
-                        Optional<Category> optionalCategory = categories.stream()
-                                .filter((c) -> c.getName().equals(categoryName))
-                                .findAny();
-                        if (!optionalCategory.isPresent()) {
-                            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("categoriesmenu-error-categorynotloaded"));
-                            HeadsInventory.getPlugin().getLogger().warning(t.getText("categoriesmenu-warning-categorynotloaded") + "(category: " + categoryName + ")");
-                            continue;
-                        }
-
-                        UUID headUuid = UUID.fromString(categoryTuple.get(CATEGORY_HEAD_UUID_INDEX));
-                        ItemStack showHeadItem = headSearcher.getHead(headUuid)
-                                .map(showHead -> {
-                                    showHead.setName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
-                                    return headToItemstackMapper.getItemStack(showHead);
-                                })
-                                .orElseGet(() -> {
-                                    HeadsInventory.getPlugin().getLogger().warning(t.getText("categoriesmenu-warning-headnotavailable") + "(category: " + categoryName + ")");
-                                    ItemStack headItem = new ItemStack(Material.PLAYER_HEAD);
-                                    SkullMeta headItemMeta = (SkullMeta) headItem.getItemMeta();
-                                    headItemMeta.setDisplayName(ChatColor.RESET + categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1));
-                                    headItem.setItemMeta(headItemMeta);
-                                    return headItem;
-                                });
-
-                        inventory.setItem(i * 9 + j, showHeadItem);
-                    }
-                }
-
-            }
-
-        }
         registerEvents();
-        player.openInventory(inventory);
+        player.openInventory(categoriesInventory);
     }
 
     @SuppressWarnings("unchecked")
-    private List<List<List<String>>> getMenuContents(FileConfiguration config) {
-        return (List<List<List<String>>>) config.get("menuContents");
+    private List<List<CategoryIcon>> getMenuContents(FileConfiguration config) {
+        final List<List<List<String>>> rawMenuContents = (List<List<List<String>>>) config.get("menuContents");
+        return Objects.requireNonNull(rawMenuContents).stream().map(
+                row -> row.stream().map(
+                        col -> new CategoryIcon(col.get(CATEGORY_NAME_INDEX), col.get(CATEGORY_HEAD_UUID_INDEX))
+                ).toList()
+        ).toList();
     }
 
     public final void registerEvents() {
-        Bukkit.getServer().getPluginManager().registerEvents(this, Objects.requireNonNull(HeadsInventory.getPlugin()));
+        Bukkit.getServer()
+                .getPluginManager()
+                .registerEvents(this, plugin);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClose(InventoryCloseEvent event) {
-        Translator t = HeadsInventory.getTranslator();
-        if (!event.getView().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + t.getText("categoriesmenu-gui-categoriestitle") + ":")) {
+        if (!event.getView().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + translator.getText("categoriesmenu-gui-categoriestitle") + ":")) {
             return;
         }
 
@@ -154,10 +179,9 @@ public class CategoriesMenu implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        FileConfiguration config = Objects.requireNonNull(HeadsInventory.getPlugin()).getConfig();
-        Translator t = HeadsInventory.getTranslator();
+        FileConfiguration config = plugin.getConfig();
 
-        if (!event.getView().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + t.getText("categoriesmenu-gui-categoriestitle") + ":")) {
+        if (!event.getView().getTitle().equals(ChatColor.DARK_BLUE + HeadsInventory.pluginChatPrefix(false) + translator.getText("categoriesmenu-gui-categoriestitle") + ":")) {
             return;
         }
 
@@ -173,13 +197,13 @@ public class CategoriesMenu implements Listener {
 
         int row = slot / 9;
         int col = slot % 9;
-        List<List<List<String>>> rows = getMenuContents(config);
+        List<List<CategoryIcon>> rows = getMenuContents(config);
 
         if ((slot < 0 || row > rows.size() - 1)) {
             return;
         }
-        List<String> categoryTuple = rows.get(row).get(col);
-        String categoryName = categoryTuple.get(CATEGORY_NAME_INDEX);
+        CategoryIcon categoryIcon = rows.get(row).get(col);
+        String categoryName = categoryIcon.categoryName();
         if ("empty".equals(categoryName)) {
             return;
         }

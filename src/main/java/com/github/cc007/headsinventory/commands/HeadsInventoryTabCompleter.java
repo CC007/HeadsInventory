@@ -27,6 +27,7 @@ import com.github.cc007.headsinventory.HeadsInventory;
 import com.github.cc007.headsplugin.api.HeadsPluginApi;
 import com.github.cc007.headsplugin.api.HeadsPluginServices;
 import com.github.cc007.headsplugin.api.business.domain.Category;
+import com.github.cc007.headsplugin.api.business.domain.exceptions.LockingException;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -36,6 +37,7 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,7 +61,12 @@ public class HeadsInventoryTabCompleter implements TabCompleter {
         HeadsPluginServices api = HeadsPluginApi.getHeadsPluginServices().orElseThrow(IllegalStateException::new);
         if (command.getName().equalsIgnoreCase("updateheads") && args.length == 1) {
             String partialCommand = args[0];
-            Set<String> commands = api.categorySearcher().getCategories().stream().map(Category::getName).collect(Collectors.toSet());
+            Set<String> commands;
+            try {
+                commands = api.categorySearcher().getCategories().stream().map(Category::getName).collect(Collectors.toSet());
+            } catch (LockingException e) {
+                commands = new HashSet<>();
+            }
             commands.add("all");
             commands.add("");
             StringUtil.copyPartialMatches(partialCommand, commands, completions);
@@ -78,7 +85,12 @@ public class HeadsInventoryTabCompleter implements TabCompleter {
         if (command.getName().equalsIgnoreCase("headsinventory") && args.length == 2) {
             if (args[0].equalsIgnoreCase("categories") || args[0].equalsIgnoreCase("category") || args[0].equalsIgnoreCase("cat")) {
                 String partialCommand = args[1];
-                Set<String> commands = api.categorySearcher().getCategories().stream().map(Category::getName).collect(Collectors.toSet());
+                Set<String> commands;
+                try {
+                    commands = api.categorySearcher().getCategories().stream().map(Category::getName).collect(Collectors.toSet());
+                } catch (LockingException e) {
+                    commands = new HashSet<>();
+                }
                 commands.add("all");
                 commands.add("");
                 StringUtil.copyPartialMatches(partialCommand, commands, completions);

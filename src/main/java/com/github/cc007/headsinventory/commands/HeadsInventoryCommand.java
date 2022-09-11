@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2015 Rik Schaaf aka CC007 (http://coolcat007.nl/).
@@ -28,6 +28,8 @@ import com.github.cc007.headsinventory.inventory.CategoriesMenu;
 import com.github.cc007.headsinventory.locale.Translator;
 import com.github.cc007.headsinventory.search.HeadsSearch;
 import com.github.cc007.headsinventory.utils.func.TriConsumer;
+import com.github.cc007.headsplugin.api.business.domain.exceptions.LockingException;
+
 import com.google.common.base.Joiner;
 
 import org.bukkit.Bukkit;
@@ -38,7 +40,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- *
  * @author Autom
  * @author CC007 (http://coolcat007.nl/)
  */
@@ -53,7 +54,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
         Translator t = HeadsInventory.getTranslator();
-        
+
         // update heads
         if (command.getName().equalsIgnoreCase("updateheads")) {
             return onUpdateHeadsCommand(sender, args);
@@ -70,7 +71,7 @@ public class HeadsInventoryCommand implements CommandExecutor {
 
     private boolean onPlayerCommand(Player player, Command command, String commandLabel, String[] args) {
         Translator t = HeadsInventory.getTranslator();
-        
+
         switch (command.getName().toLowerCase()) {
             case "myhead":
                 return onMyHeadCommand(player);
@@ -124,27 +125,27 @@ public class HeadsInventoryCommand implements CommandExecutor {
         player.sendMessage(HeadsInventory.getHelpMessage());
         return true;
     }
-    
+
     private boolean onAddHeadCommand(Player player, String[] args) {
         Translator t = HeadsInventory.getTranslator();
         if (!player.hasPermission("headsinv.add")) {
             player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-addhead-nopermission"));
             return false;
         }
-        
+
         if (args.length < 1) {
             player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-addhead-noheadname"));
             return false;
         }
         //TODO check name for edge cases
-        
+
         HeadsSearch.saveHead(player, Joiner.on(" ").join(args));
         return true;
     }
 
     private boolean onHeadsInventoryCommand(Player player, String[] args) {
         Translator t = HeadsInventory.getTranslator();
-        
+
         if (!player.hasPermission("headsinv.inventory")) {
             player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("error-headsinv-nopermission"));
             return false;
@@ -190,13 +191,15 @@ public class HeadsInventoryCommand implements CommandExecutor {
     private boolean onCategoriesCommand(Player player, String[] args) {
         Translator t = HeadsInventory.getTranslator();
         if (args.length == 1) {
-            /*//return the category names
-            HeadsSearch.sendCategoriesList(player);*/
-
-            //open the categories ui
-            CategoriesMenu menu = new CategoriesMenu(player);
-            menu.open();
-            return true;
+            // open the categories ui
+            try {
+                CategoriesMenu menu = new CategoriesMenu(player);
+                menu.open();
+                return true;
+            } catch (LockingException ex) {
+                player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("categoriesmenu-error-categorynotloaded"));
+                return true;
+            }
         }
 
         if (args.length > 2) {
@@ -204,12 +207,16 @@ public class HeadsInventoryCommand implements CommandExecutor {
             return false;
         }
 
-        if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("*")) {
-            return HeadsSearch.searchAllCategories(player);
+        try {
+            if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("*")) {
+                return HeadsSearch.searchAllCategories(player);
+            }
+
+            return HeadsSearch.searchCategory(player, args[1]);
+        } catch (LockingException ex) {
+            player.sendMessage(HeadsInventory.pluginChatPrefix(true) + ChatColor.RED + t.getText("categoriesmenu-error-categoriesnotloaded"));
+            return true;
         }
-
-        return HeadsSearch.searchCategory(player, args[1]);
-
     }
 
     private boolean onSearchCommand(Player player, String[] args) {
